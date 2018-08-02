@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { normalize } from './name-normalizer';
 
 describe('a name normalizer', () => {

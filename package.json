@@ -5,11 +5,12 @@
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
+    "coffeescript": "^2.3.1",
     "mocha": "^5.2.0"
   },
   "dependencies": {},
   "scripts": {
-    "test": "./node_modules/.bin/mocha --compilers js:babel-core/register ./src/**/*.test.js",
-    "test:watch": "./node_modules/.bin/mocha --compilers js:babel-core/register ./src/**/*.test.js --watch --reporter min"
+    "test": "./node_modules/.bin/mocha --require babel-core/register ./src/**/*.test.js",
+    "test:watch": "./node_modules/.bin/mocha --require babel-core/register ./src/**/*.test.js --watch --reporter min"
   }
 }
