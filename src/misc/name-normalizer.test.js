@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { normalize } from './name-normalizer';
 
 describe('a name normalizer', () => {
-  it('returns empty when passed empty string', () => {
+  xit('returns empty when passed empty string', () => {
     expect(normalize("")).to.equal("");
   });
 
