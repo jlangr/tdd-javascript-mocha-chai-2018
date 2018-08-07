@@ -1,0 +1,4 @@
+#!/bin/sh
+BRANCH_ID=$1
+NEW_BRANCH_ADDRESS=$2
+curl -H "Content-Type: application/json" -XPATCH http://localhost:3001/branches/$BRANCH_ID -d "{\"address\": \"$NEW_BRANCH_ADDRESS\"}"
