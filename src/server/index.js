@@ -48,7 +48,7 @@ app.patch('/branches/:id', (request, response) => {
   const patch = request.body;
   const id = request.params.id;
   const branch = branches[id];
-  // merge -- you delete a key by setting it to null... does this have to be coded
+  // merge. Delete a key by setting it to null... does this have to be coded?
   Object.assign(branch, patch);
   return response.json(branches[id]);
 });
