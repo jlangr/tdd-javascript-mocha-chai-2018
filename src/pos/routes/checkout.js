@@ -1,4 +1,4 @@
-let nextId = 1001;
+import Generator from '../data/id-generator';
 
 const checkouts = {};
 
@@ -14,7 +14,7 @@ export const getCheckouts = (request, response) => {
 };
 
 export const postCheckout = (request, response) => {
-  const newCheckout = { id: nextId++, items: [] };
+  const newCheckout = { id: Generator.id(), items: [] };
   checkouts[newCheckout.id] = newCheckout;
   response.status = 201;
   return response.json(newCheckout);
@@ -29,7 +29,7 @@ export const getItems = (request, response) => {
 export const postItem = (request, response) => {
   const body = request.body;
   const checkoutId = request.params.id;
-  const newCheckoutItem = { id: nextId++ };
+  const newCheckoutItem = { id: Generator.id() };
   const item = items[body.upc]; // not found?
   Object.assign(newCheckoutItem, item);
 
