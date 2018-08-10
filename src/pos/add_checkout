@@ -1,2 +1,2 @@
 #!/bin/sh
-curl -H "Content-Type: application/json"  -XPOST "http://localhost:3001/checkouts" -d "{}" 
+curl -H "Content-Type: application/json"  -XPOST "http://localhost:3101/checkouts" -d "{}" 

@@ -1,2 +1,2 @@
 #!/bin/sh
-curl http://localhost:3001/checkouts/
+curl http://localhost:3101/checkouts/

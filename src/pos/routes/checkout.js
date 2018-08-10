@@ -9,21 +9,25 @@ const items = {
   '2004': { upc: '2004', description: 'Red bell pepper, ea', price: 0.99 },
 };
 
+export const clearAllCheckouts = (request, response) => {
+  for (var member in checkouts) delete checkouts[member];
+};
+
 export const getCheckouts = (request, response) => {
-  response.send(Object.values(checkouts));
+  return response.send(Object.values(checkouts));
 };
 
 export const postCheckout = (request, response) => {
   const newCheckout = { id: Generator.id(), items: [] };
   checkouts[newCheckout.id] = newCheckout;
   response.status = 201;
-  return response.json(newCheckout);
+  response.send(newCheckout);
 };
 
 export const getItems = (request, response) => {
   const id = request.params.id;
   const checkout = checkouts[id];
-  return response.json(checkout.items);
+  response.send(checkout.items);
 };
 
 export const postItem = (request, response) => {
@@ -37,5 +41,5 @@ export const postItem = (request, response) => {
   checkout.items.push(newCheckoutItem);
 
   response.status = 201;
-  return response.json(newCheckoutItem);
+  return response.send(newCheckoutItem);
 };
