@@ -9,15 +9,10 @@ import Generator from '../data/id-generator';
 
 describe('checkout functionality', () => {
   let response;
-  let generatorStub;
+
   beforeEach(() => {
     response = emptyResponse();
     clearAllCheckouts();
-    generatorStub = sinon.stub(Generator, 'id');
-  });
-
-  afterEach(() => {
-    Generator.id.restore();
   });
 
   const emptyResponse = () => ({ 
@@ -27,28 +22,27 @@ describe('checkout functionality', () => {
 
   describe('postCheckout', () => {
     xit('creates a new checkout object', () => {
-      generatorStub.returns(2018);
+      Generator.reset(1001);
 
       postCheckout({}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: 2018, items: []}));
+      expect(sinon.assert.calledWith(response.send, { id: 1001, items: []}));
       expect(response.status).to.equal(201);
     });
   });
 
   describe('getCheckouts', () => {
     it('returns stored checkouts', () => {
-      generatorStub.returns(2001);
+      Generator.reset(1001);
       postCheckout({}, emptyResponse());
-      generatorStub.returns(2002);
       postCheckout({}, emptyResponse());
 
       getCheckouts({}, response);
 
       expect(sinon.assert.calledWith(response.send, 
         [
-          { id: 2001, items: [] },
-          { id: 2002, items: []}
+          { id: 1001, items: [] },
+          { id: 1002, items: []}
         ]
       ));
     });
