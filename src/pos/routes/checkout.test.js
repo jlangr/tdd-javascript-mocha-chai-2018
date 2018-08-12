@@ -67,18 +67,34 @@ describe('checkout functionality', () => {
     });
 
     it('returns created object on post', () => {
-      const request = {
-        params: { id: checkoutId },
-        body: { upc: '333' }
-      };
+      const request = { params: { id: checkoutId }, body: { upc: '333' } };
       itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: 'Milk', price: 3.33 }));
       Generator.reset(1002);
 
       postItem(request, response);
 
       expect(response.status).to.equal(201);
-      expect(sinon.assert.calledWith(response.send,
-        { id: 1002, upc: '333', description: 'Milk', price: 3.33 }));
+      expect(sinon.assert.calledWith(response.send, { id: 1002, upc: '333', description: 'Milk', price: 3.33 }));
+    });
+
+    it('returns error when item UPC not found', () => {
+      const request = { params: { id: checkoutId }, body: { upc: '333' } };
+      itemDatabaseRetrieveStub.callsFake(upc => undefined);
+
+      postItem(request, response);
+
+      expect(response.status).to.equal(400);
+      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized UPC code' }));
+    });
+
+    it('returns error when checkout not found', () => {
+      const request = { params: { id: -1 }, body: { upc: '333' } };
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: '', price: 0.00 }));
+
+      postItem(request, response);
+
+      expect(response.status).to.equal(400);
+      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout id' }));
     });
   });
 })

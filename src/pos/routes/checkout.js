@@ -30,12 +30,24 @@ export const postItem = (request, response) => {
   const body = request.body;
   const checkoutId = request.params.id;
   const newCheckoutItem = { id: Generator.id() };
-  const item = itemDatabase.retrieve(body.upc); // not found?
+  const item = itemDatabase.retrieve(body.upc);
+  if (!item) {
+    response.status = 400;
+    response.send({error: 'unrecognized UPC code'});
+    return;
+  }
+
   Object.assign(newCheckoutItem, item);
 
-  const checkout = checkouts[checkoutId]; // not found
+  const checkout = checkouts[checkoutId];
+  if (!checkout) {
+    response.status = 400;
+    response.send({error: 'nonexistent checkout id'});
+    return;
+  }
+
   checkout.items.push(newCheckoutItem);
 
   response.status = 201;
-  return response.send(newCheckoutItem);
+  response.send(newCheckoutItem);
 };
