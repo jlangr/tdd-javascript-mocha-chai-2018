@@ -2,10 +2,13 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { 
   clearAllCheckouts,
+  getCheckout,
   getCheckouts,
   postCheckout,
-  postItem
+  postItem,
+  postMember
 } from './checkout';
+import MemberDatabase from '../data/member_database';
 import ItemDatabase from '../data/item_database';
 import Generator from '../data/id-generator';
 
@@ -35,7 +38,16 @@ describe('checkout functionality', () => {
       expect(response.status).to.equal(201);
     });
 
-    it('returns created checkouts on get', () => {
+    it('returns created checkout on get', () => {
+      const checkoutId = 1001;
+      addCheckout(checkoutId);
+
+      getCheckout({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, items: [] }));
+    });
+
+    it('returns created checkouts on get all', () => {
       Generator.reset(1001);
       postCheckout({}, emptyResponse());
       postCheckout({}, emptyResponse());
@@ -51,50 +63,87 @@ describe('checkout functionality', () => {
     });
   });
 
- describe('items', () => {
+  const addCheckout = id => {
+    Generator.reset(id);
+    postCheckout({}, response);
+    sendSpy.resetHistory();
+  };
+
+  // TODO: add item before checkout initiated--creates checkout
+  describe('items', () => {
     const checkoutId = 1001;
     let itemDatabaseRetrieveStub;
 
     beforeEach(()=> {
-      Generator.reset(checkoutId);
-      postCheckout({}, response);
-      sendSpy.resetHistory();
+      addCheckout(checkoutId);
       itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve');
     });
 
-    afterEach(() => {
-      itemDatabaseRetrieveStub.restore();
-    });
+    afterEach(() => itemDatabaseRetrieveStub.restore());
 
     it('returns created object on post', () => {
-      const request = { params: { id: checkoutId }, body: { upc: '333' } };
       itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: 'Milk', price: 3.33 }));
       Generator.reset(1002);
 
-      postItem(request, response);
+      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(201);
       expect(sinon.assert.calledWith(response.send, { id: 1002, upc: '333', description: 'Milk', price: 3.33 }));
     });
 
     it('returns error when item UPC not found', () => {
-      const request = { params: { id: checkoutId }, body: { upc: '333' } };
       itemDatabaseRetrieveStub.callsFake(upc => undefined);
 
-      postItem(request, response);
+      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(400);
       expect(sinon.assert.calledWith(response.send, { error: 'unrecognized UPC code' }));
     });
 
     it('returns error when checkout not found', () => {
-      const request = { params: { id: -1 }, body: { upc: '333' } };
       itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: '', price: 0.00 }));
 
-      postItem(request, response);
+      postItem({ params: { id: -1 }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout id' }));
+      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' }));
     });
   });
-})
+
+  // TODO: identify member before checkout initiated creates checkout
+  describe('member', () => {
+    const checkoutId = 1001;
+    let memberDatabaseRetrieveStub;
+
+    beforeEach(() => {
+      memberDatabaseRetrieveStub = sinon.stub(MemberDatabase.prototype, 'retrieve');
+      addCheckout(checkoutId);
+    });
+
+    afterEach(() => memberDatabaseRetrieveStub.restore());
+
+    it('attaches member information to checkout', () => {
+      memberDatabaseRetrieveStub.callsFake(upc => ({ member: '719-287-4335', discount: '0.01', name: 'Jeff Languid' }));
+
+      postMember({ params: { id: checkoutId }, body: { id: '719-287-4335' }}, response);
+      sendSpy.resetHistory();
+
+      getCheckout({params: { id: checkoutId }}, response);
+      expect(sinon.assert.calledWith(response.send, 
+        { id: checkoutId, items: [],
+          member: '719-287-4335', discount: '0.01', name: 'Jeff Languid'
+        }));
+    });
+
+    it('returns error when checkout not found', () => {
+      postMember({ params: { id: checkoutId }, body: { id: 'unknown' }}, response);
+
+      expect(response.status).to.equal(400);
+      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized member' }));
+    });
+
+    it('returns error when member not found', () => {
+
+    });
+  });
+});

@@ -5,10 +5,10 @@ const items = {
   '2004': { upc: '2004', description: 'Red bell pepper, ea', price: 0.99 },
 };
 
-class ItemDatabase {
+export default class ItemDatabase {
   retrieve(upc) {
     return items[upc];
   }
 };
 
-export default ItemDatabase;
+// export default new ItemDatabase();

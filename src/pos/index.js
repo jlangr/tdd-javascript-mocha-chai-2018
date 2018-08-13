@@ -1,10 +1,12 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { 
+  getCheckout,
   getCheckouts,
   postCheckout,
   getItems,
-  postItem
+  postItem,
+  postMember
  } from './routes/checkout';
 
 export const app = express();
@@ -19,9 +21,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// TODO collapse checkouts route definitions?
+
 app.route('/checkouts')
   .get(getCheckouts)
   .post(postCheckout);
+
+app.route('checkout/:id')
+  .get(getCheckout);
 
 // DELETE checkout
 // void item (delete)
@@ -29,6 +36,11 @@ app.route('/checkouts')
 app.route('/checkouts/:id/items')
   .get(getItems)
   .post(postItem);
+
+
+// TODO how to test these directly
+app.route('/checkouts/:id/member')
+  .post(postMember);
 
 export const server = app.listen(port, err => {
   if (err) return console.log('ERROR: ', err);

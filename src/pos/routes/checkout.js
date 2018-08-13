@@ -1,12 +1,19 @@
 import Generator from '../data/id-generator';
 import ItemDatabase from '../data/item_database';
+import MemberDatabase from '../data/member_database';
 
 const checkouts = {};
 
-export const itemDatabase = new ItemDatabase();
+const itemDatabase = new ItemDatabase();
+const memberDatabase = new MemberDatabase();
 
 export const clearAllCheckouts = (request, response) => {
   for (var member in checkouts) delete checkouts[member];
+};
+
+export const getCheckout = (request, response) => {
+  const checkout = checkouts[request.params.id];
+  return response.send(checkout);
 };
 
 export const getCheckouts = (request, response) => {
@@ -26,6 +33,29 @@ export const getItems = (request, response) => {
   response.send(checkout.items);
 };
 
+export const postMember = (request, response) => {
+  const body = request.body;
+  const member = memberDatabase.retrieve(body.id);
+  if (!member) {
+    response.status = 400;
+    response.send({error: 'unrecognized member'});
+    return;
+  }
+
+  const checkoutId = request.params.id;
+
+  const checkout = checkouts[checkoutId];
+  if (!checkout) {
+    response.status = 400;
+    response.send({error: 'invalid checkout'});
+    return;
+  }
+  Object.assign(checkout, member);
+
+  response.status = 200;
+  response.send(checkouts[checkoutId]);
+};
+
 export const postItem = (request, response) => {
   const body = request.body;
   const checkoutId = request.params.id;
@@ -42,7 +72,7 @@ export const postItem = (request, response) => {
   const checkout = checkouts[checkoutId];
   if (!checkout) {
     response.status = 400;
-    response.send({error: 'nonexistent checkout id'});
+    response.send({error: 'nonexistent checkout'});
     return;
   }
 
