@@ -59,13 +59,19 @@ describe('checkout functionality', () => {
     status: undefined 
   });
 
-  xdescribe('checkouts', () => {
+  const expectResponseMatches = expected =>
+    expect(sinon.assert.calledWith(response.send, sinon.match(expected)));
+
+  const expectResponseEquals = expected => 
+    sinon.assert.calledWith(response.send, expected);
+
+  describe('checkouts', () => {
     it('returns created object on post', () => {
       Generator.reset(1001);
 
       postCheckout({}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: 1001, items: []}));
+      expectResponseEquals({ id: 1001, items: []});
       expect(response.status).to.equal(201);
     });
 
@@ -75,7 +81,7 @@ describe('checkout functionality', () => {
 
       getCheckout({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, items: [] }));
+      expectResponseEquals({ id: checkoutId, items: [] });
     });
 
     it('returns created checkouts on get all', () => {
@@ -85,12 +91,7 @@ describe('checkout functionality', () => {
 
       getCheckouts({}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-        [
-          { id: 1001, items: [] },
-          { id: 1002, items: []}
-        ]
-      ));
+      expectResponseEquals([{ id: 1001, items: [] }, { id: 1002, items: [] }]);
     });
   });
 
@@ -101,7 +102,8 @@ describe('checkout functionality', () => {
   };
 
   // TODO: add item before checkout initiated--creates checkout
-  xdescribe('items', () => {
+
+  describe('items', () => {
     const checkoutId = 1001;
 
     beforeEach(()=> {
@@ -115,7 +117,7 @@ describe('checkout functionality', () => {
       postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(201);
-      expect(sinon.assert.calledWith(response.send, { id: 1002, upc: '333', description: 'Milk', price: 3.33 }));
+      expectResponseEquals({ id: 1002, upc: '333', description: 'Milk', price: 3.33 });
     });
 
     it('returns error when item UPC not found', () => {
@@ -124,7 +126,7 @@ describe('checkout functionality', () => {
       postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized UPC code' }));
+      expectResponseEquals({ error: 'unrecognized UPC code' });
     });
 
     it('returns error when checkout not found', () => {
@@ -133,13 +135,13 @@ describe('checkout functionality', () => {
       postItem({ params: { id: -1 }, body: { upc: '333' } }, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' }));
+      expectResponseEquals({ error: 'nonexistent checkout' });
     });
   });
 
   // TODO: identify member before checkout initiated creates checkout
 
-  xdescribe('member', () => {
+  describe('member', () => {
     const checkoutId = 1001;
 
     beforeEach(() => {
@@ -154,17 +156,14 @@ describe('checkout functionality', () => {
 
       getCheckout({params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-        { id: checkoutId, items: [],
-          member: '719-287-4335', discount: 0.01, name: 'Jeff Languid'
-        }));
+      expectResponseMatches({ member: '719-287-4335', discount: 0.01, name: 'Jeff Languid' });
     });
 
     it('returns error when checkout not found', () => {
       postMember({ params: { id: checkoutId }, body: { id: 'unknown' }}, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized member' }));
+      expectResponseEquals({ error: 'unrecognized member' });
     });
 
     it('returns error when member not found', () => {
@@ -173,11 +172,11 @@ describe('checkout functionality', () => {
       postMember({ params: { id: checkoutId }, body: { id: 'anything' }}, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized member' }));
+      expectResponseEquals({ error: 'unrecognized member' });
     });
   });
 
-  xdescribe('checkout total', () => {
+  describe('checkout total', () => {
     beforeEach(() => addCheckout(checkoutId));
 
     it('sums all items', () => {
@@ -187,14 +186,14 @@ describe('checkout functionality', () => {
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
       expect(response.status).to.equal(200);
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 6.50, totalOfDiscountedItems: 6.50 }));
+      expectResponseMatches({ total: 6.50 });
     });
 
     it('returns error when checkout not found', () => {
       postCheckoutTotal({ params: { id: 'unknown' }}, response);
 
       expect(response.status).to.equal(400);
-      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' }));
+      expectResponseEquals({ error: 'nonexistent checkout' });
     });
 
     it('applies any member discount', () => {
@@ -204,8 +203,7 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-        sinon.match({ total: 9.00 })));
+      expectResponseMatches({ total: 9.00 });
     });
 
     it('does not discount exempt items', () => {
