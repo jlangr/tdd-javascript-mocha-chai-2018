@@ -166,15 +166,23 @@ describe('checkout functionality', () => {
     afterEach(() => itemDatabaseRetrieveStub.restore());
     afterEach(() => memberDatabaseRetrieveStub.restore());
 
-    const purchase = (upc, price) => { 
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: upc, price: price }));
-      postItem({ params: { id: checkoutId }, body: { upc: upc } }, response);
+    const purchaseItem = (upc, price, exempt = false) => { 
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc, price, exempt }));
+      postItem({ params: { id: checkoutId }, body: { upc } }, response);
       sendSpy.resetHistory();
+    }
+
+    const purchaseExemptItem = (upc, price) => { 
+      purchaseItem(upc, price, true);
+    };
+
+    const purchase = (upc, price) => { 
+      purchaseItem(upc, price, false);
     };
 
     const scanMember = (id, discount, name = 'Jeff Languid') => {
       memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount: discount, name: name }));
-      postMember({ params: { id: checkoutId }, body: { id: id }}, response);
+      postMember({ params: { id: checkoutId }, body: { id }}, response);
       sendSpy.resetHistory();
     }
 
@@ -203,6 +211,16 @@ describe('checkout functionality', () => {
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
       expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.00 }));
+    });
+
+    it('does not discount exempt items', () => {
+      scanMember('719-287-4335', 0.10);
+      purchase('333', 4.00);
+      purchaseExemptItem('444', 6.00);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60 }));
     });
   });
 });
