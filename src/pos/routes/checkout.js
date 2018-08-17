@@ -91,9 +91,13 @@ export const postCheckoutTotal = (request, response) => {
     return;
   }
 
+  const discount = checkout.member ? checkout.discount : 0;
+
   let total = 0;
   checkout.items.forEach(item => {
-    total += item.price;
+    let price = item.price;
+    price = price - (discount * price);
+    total += price;
   });
 
   response.status = 200;

@@ -112,6 +112,7 @@ describe('checkout functionality', () => {
   });
 
   // TODO: identify member before checkout initiated creates checkout
+
   describe('member', () => {
     const checkoutId = 1001;
     let memberDatabaseRetrieveStub;
@@ -124,15 +125,15 @@ describe('checkout functionality', () => {
     afterEach(() => memberDatabaseRetrieveStub.restore());
 
     it('attaches member information to checkout', () => {
-      memberDatabaseRetrieveStub.callsFake(upc => ({ member: '719-287-4335', discount: '0.01', name: 'Jeff Languid' }));
-
+      memberDatabaseRetrieveStub.callsFake(upc => ({ member: '719-287-4335', discount: 0.01, name: 'Jeff Languid' }));
       postMember({ params: { id: checkoutId }, body: { id: '719-287-4335' }}, response);
       sendSpy.resetHistory();
 
       getCheckout({params: { id: checkoutId }}, response);
+
       expect(sinon.assert.calledWith(response.send, 
         { id: checkoutId, items: [],
-          member: '719-287-4335', discount: '0.01', name: 'Jeff Languid'
+          member: '719-287-4335', discount: 0.01, name: 'Jeff Languid'
         }));
     });
 
@@ -144,27 +145,42 @@ describe('checkout functionality', () => {
     });
 
     it('returns error when member not found', () => {
+      memberDatabaseRetrieveStub.callsFake(upc => undefined);
 
+      postMember({ params: { id: checkoutId }, body: { id: 'anything' }}, response);
+
+      expect(response.status).to.equal(400);
+      expect(sinon.assert.calledWith(response.send, { error: 'unrecognized member' }));
     });
   });
 
   describe('checkout total', () => {
     const checkoutId = 1001;
     let itemDatabaseRetrieveStub;
+    let memberDatabaseRetrieveStub;
 
-    beforeEach(()=> {
-      addCheckout(checkoutId);
-      itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve');
-    });
+    beforeEach(() => addCheckout(checkoutId));
+    beforeEach(() => memberDatabaseRetrieveStub = sinon.stub(MemberDatabase.prototype, 'retrieve'));
+    beforeEach(()=> itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve'));
 
     afterEach(() => itemDatabaseRetrieveStub.restore());
+    afterEach(() => memberDatabaseRetrieveStub.restore());
+
+    const purchase = (upc, price) => { 
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: upc, price: price }));
+      postItem({ params: { id: checkoutId }, body: { upc: upc } }, response);
+      sendSpy.resetHistory();
+    };
+
+    const scanMember = (id, discount, name = 'Jeff Languid') => {
+      memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount: discount, name: name }));
+      postMember({ params: { id: checkoutId }, body: { id: id }}, response);
+      sendSpy.resetHistory();
+    }
 
     it('sums all items', () => {
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', price: 3.50 }));
-      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '444', price: 3.00 }));
-      postItem({ params: { id: checkoutId }, body: { upc: '444' } }, response);
-      sendSpy.resetHistory();
+      purchase('333', 3.50);
+      purchase('444', 3.00);
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
@@ -180,7 +196,13 @@ describe('checkout functionality', () => {
     });
 
     it('applies any member discount', () => {
-// TODO
+      scanMember('719-287-4335', 0.10);
+      purchase('333', 4.50);
+      purchase('444', 5.50);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.00 }));
     });
   });
 });
