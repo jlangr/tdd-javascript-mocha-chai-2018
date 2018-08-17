@@ -105,7 +105,7 @@ export const postCheckoutTotal = (request, response) => {
   checkout.items.forEach(item => {
     let price = item.price;
     const isExempt = item.exempt;
-    if (!isExempt && discount > 0) {  // TODO discounted item total is 0 if discount is 0
+    if (!isExempt && discount > 0) {
       const discountAmount = discount * price;
       const discountedPrice = price - discountAmount;
 

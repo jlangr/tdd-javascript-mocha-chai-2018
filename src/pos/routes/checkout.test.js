@@ -227,6 +227,25 @@ describe('checkout functionality', () => {
       expect(sinon.assert.calledWith(response.send, 
          sinon.match({ totalOfDiscountedItems:  3.60 })));
     });
+
+    it('provides 0 total for discounted items when no member scanned', () => {
+      purchase('333', 4.00);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, 
+         sinon.match({ totalOfDiscountedItems: 0.0 })));
+    });
+
+    it('provides 0 total for discounted items when member discount is 0', () => {
+      scanMember('719-287-4335', 0.00);
+      purchase('333', 4.00);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, 
+         sinon.match({ totalOfDiscountedItems: 0.0 })));
+    });
   });
 
   describe('message lines', () => {
