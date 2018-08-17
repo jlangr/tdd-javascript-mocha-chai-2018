@@ -95,14 +95,18 @@ export const postCheckoutTotal = (request, response) => {
 
   let totalOfDiscountedItems = 0;
   let total = 0;
+
   checkout.items.forEach(item => {
     let price = item.price;
     const isExempt = item.exempt;
     if (!isExempt) {
-      price = price - (discount * price);
-      totalOfDiscountedItems += price;
+      const discountedPrice = price - (discount * price);
+      totalOfDiscountedItems += discountedPrice;
+      total += discountedPrice;
     }
-    total += price;
+    else {
+      total += price;
+    }
   });
 
   response.status = 200;
