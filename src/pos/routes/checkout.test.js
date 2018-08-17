@@ -210,7 +210,8 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.00, totalOfDiscountedItems: 9.00 }));
+      expect(sinon.assert.calledWith(response.send, 
+        sinon.match({ total: 9.00 })));
     });
 
     it('does not discount exempt items', () => {
@@ -220,7 +221,8 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60, totalOfDiscountedItems: 3.60 }));
+      expect(sinon.assert.calledWith(response.send, 
+        sinon.match({ total: 9.60 })));
     });
 
     it('provides total of discounted items', () => {
@@ -230,7 +232,8 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60, totalOfDiscountedItems:  3.60 }));
+      expect(sinon.assert.calledWith(response.send, 
+         sinon.match({ totalOfDiscountedItems:  3.60 })));
     });
   });
 });
