@@ -4,6 +4,7 @@ import {
   getCheckout,
   getCheckouts,
   postCheckout,
+  postCheckoutTotal,
   getItems,
   postItem,
   postMember
@@ -41,6 +42,9 @@ app.route('/checkouts/:id/items')
 // TODO how to test these directly
 app.route('/checkouts/:id/member')
   .post(postMember);
+
+app.route('/checkouts/:id/total')
+  .post(postCheckoutTotal);
 
 export const server = app.listen(port, err => {
   if (err) return console.log('ERROR: ', err);

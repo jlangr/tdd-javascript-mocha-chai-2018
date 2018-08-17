@@ -5,6 +5,7 @@ import {
   getCheckout,
   getCheckouts,
   postCheckout,
+  postCheckoutTotal,
   postItem,
   postMember
 } from './checkout';
@@ -144,6 +145,42 @@ describe('checkout functionality', () => {
 
     it('returns error when member not found', () => {
 
+    });
+  });
+
+  describe('checkout total', () => {
+    const checkoutId = 1001;
+    let itemDatabaseRetrieveStub;
+
+    beforeEach(()=> {
+      addCheckout(checkoutId);
+      itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve');
+    });
+
+    afterEach(() => itemDatabaseRetrieveStub.restore());
+
+    it('sums all items', () => {
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', price: 3.50 }));
+      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '444', price: 3.00 }));
+      postItem({ params: { id: checkoutId }, body: { upc: '444' } }, response);
+      sendSpy.resetHistory();
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(response.status).to.equal(200);
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 6.50 }));
+    });
+
+    it('returns error when checkout not found', () => {
+      postCheckoutTotal({ params: { id: 'unknown' }}, response);
+
+      expect(response.status).to.equal(400);
+      expect(sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' }));
+    });
+
+    it('applies any member discount', () => {
+// TODO
     });
   });
 });

@@ -81,3 +81,21 @@ export const postItem = (request, response) => {
   response.status = 201;
   response.send(newCheckoutItem);
 };
+
+export const postCheckoutTotal = (request, response) => {
+  const checkoutId = request.params.id;
+  const checkout = checkouts[checkoutId];
+  if (!checkout) {
+    response.status = 400;
+    response.send({error: 'nonexistent checkout'});
+    return;
+  }
+
+  let total = 0;
+  checkout.items.forEach(item => {
+    total += item.price;
+  });
+
+  response.status = 200;
+  response.send({ id: checkoutId, total: total });
+};
