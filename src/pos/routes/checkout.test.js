@@ -193,7 +193,7 @@ describe('checkout functionality', () => {
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
       expect(response.status).to.equal(200);
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 6.50 }));
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 6.50, totalOfDiscountedItems: 6.50 }));
     });
 
     it('returns error when checkout not found', () => {
@@ -210,7 +210,7 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.00 }));
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.00, totalOfDiscountedItems: 9.00 }));
     });
 
     it('does not discount exempt items', () => {
@@ -220,7 +220,17 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60 }));
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60, totalOfDiscountedItems: 3.60 }));
+    });
+
+    it('provides total of discounted items', () => {
+      scanMember('719-287-4335', 0.10);
+      purchase('333', 4.00);
+      purchaseExemptItem('444', 6.00);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expect(sinon.assert.calledWith(response.send, { id: checkoutId, total: 9.60, totalOfDiscountedItems:  3.60 }));
     });
   });
 });

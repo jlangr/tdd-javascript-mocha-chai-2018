@@ -93,16 +93,18 @@ export const postCheckoutTotal = (request, response) => {
 
   const discount = checkout.member ? checkout.discount : 0;
 
+  let totalOfDiscountedItems = 0;
   let total = 0;
   checkout.items.forEach(item => {
     let price = item.price;
     const isExempt = item.exempt;
     if (!isExempt) {
       price = price - (discount * price);
+      totalOfDiscountedItems += price;
     }
     total += price;
   });
 
   response.status = 200;
-  response.send({ id: checkoutId, total: total });
+  response.send({ id: checkoutId, total, totalOfDiscountedItems  });
 };
