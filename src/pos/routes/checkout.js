@@ -82,6 +82,11 @@ export const postItem = (request, response) => {
   response.send(newCheckoutItem);
 };
 
+const pad = (s, length) => s + ' '.repeat(length - s.length);
+
+const LineWidth = 45;
+const MaxTextWidth = 40;
+
 export const postCheckoutTotal = (request, response) => {
   const checkoutId = request.params.id;
   const checkout = checkouts[checkoutId];
@@ -91,6 +96,7 @@ export const postCheckoutTotal = (request, response) => {
     return;
   }
 
+  const messages = [];
   const discount = checkout.member ? checkout.discount : 0;
 
   let totalOfDiscountedItems = 0;
@@ -99,16 +105,31 @@ export const postCheckoutTotal = (request, response) => {
   checkout.items.forEach(item => {
     let price = item.price;
     const isExempt = item.exempt;
-    if (!isExempt) {
+    if (!isExempt && discount > 0) {  // TODO discounted item total is 0 if discount is 0
       const discountedPrice = price - (discount * price);
       totalOfDiscountedItems += discountedPrice;
       total += discountedPrice;
     }
     else {
       total += price;
+      const text = item.description;
+      const amount = formatAmount(price);
+      const amountWidth = amount.length;
+
+      const textWidth = LineWidth - amountWidth;
+      messages.push(pad(text, textWidth) + amount);
     }
   });
 
+  // append total line
+  const formattedTotal = formatAmount(total);
+  const formattedTotalWidth = formattedTotal.length;
+  const textWidth = LineWidth - formattedTotalWidth;
+  messages.push(pad('TOTAL', textWidth) + formattedTotal);
+
   response.status = 200;
-  response.send({ id: checkoutId, total, totalOfDiscountedItems  });
+  // send total saved instead
+  response.send({ id: checkoutId, total, totalOfDiscountedItems, messages });
 };
+
+const formatAmount = amount => parseFloat(Math.round(amount * 100) / 100).toFixed(2);

@@ -16,6 +16,10 @@ import Generator from '../data/id-generator';
 describe('checkout functionality', () => {
   let response;
   let sendSpy;
+  let itemDatabaseRetrieveStub;
+  let memberDatabaseRetrieveStub;
+
+  const checkoutId = 1001;
 
   beforeEach(() => {
     sendSpy = sinon.spy();
@@ -24,12 +28,38 @@ describe('checkout functionality', () => {
     clearAllCheckouts();
   });
 
+  beforeEach(() => itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve'));
+  beforeEach(() => memberDatabaseRetrieveStub = sinon.stub(MemberDatabase.prototype, 'retrieve'));
+
+  afterEach(() => itemDatabaseRetrieveStub.restore());
+  afterEach(() => memberDatabaseRetrieveStub.restore());
+
+  const purchaseItem = (upc, price, description, exempt = false) => { 
+    itemDatabaseRetrieveStub.callsFake(upc => ({ upc, price, description, exempt }));
+    postItem({ params: { id: checkoutId }, body: { upc } }, response);
+    sendSpy.resetHistory();
+  }
+
+  const purchaseExemptItem = (upc, price, description='') => { 
+    purchaseItem(upc, price, description, true);
+  };
+
+  const purchase = (upc, price, description='') => { 
+    purchaseItem(upc, price, description, false);
+  };
+
+  const scanMember = (id, discount, name = 'Jeff Languid') => {
+    memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount: discount, name: name }));
+    postMember({ params: { id: checkoutId }, body: { id }}, response);
+    sendSpy.resetHistory();
+  }
+
   const emptyResponse = () => ({ 
     send: sendSpy,
     status: undefined 
   });
 
-  describe('checkouts', () => {
+  xdescribe('checkouts', () => {
     it('returns created object on post', () => {
       Generator.reset(1001);
 
@@ -71,16 +101,12 @@ describe('checkout functionality', () => {
   };
 
   // TODO: add item before checkout initiated--creates checkout
-  describe('items', () => {
+  xdescribe('items', () => {
     const checkoutId = 1001;
-    let itemDatabaseRetrieveStub;
 
     beforeEach(()=> {
       addCheckout(checkoutId);
-      itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve');
     });
-
-    afterEach(() => itemDatabaseRetrieveStub.restore());
 
     it('returns created object on post', () => {
       itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: 'Milk', price: 3.33 }));
@@ -113,16 +139,13 @@ describe('checkout functionality', () => {
 
   // TODO: identify member before checkout initiated creates checkout
 
-  describe('member', () => {
+  xdescribe('member', () => {
     const checkoutId = 1001;
-    let memberDatabaseRetrieveStub;
 
     beforeEach(() => {
-      memberDatabaseRetrieveStub = sinon.stub(MemberDatabase.prototype, 'retrieve');
       addCheckout(checkoutId);
     });
 
-    afterEach(() => memberDatabaseRetrieveStub.restore());
 
     it('attaches member information to checkout', () => {
       memberDatabaseRetrieveStub.callsFake(upc => ({ member: '719-287-4335', discount: 0.01, name: 'Jeff Languid' }));
@@ -154,37 +177,8 @@ describe('checkout functionality', () => {
     });
   });
 
-  describe('checkout total', () => {
-    const checkoutId = 1001;
-    let itemDatabaseRetrieveStub;
-    let memberDatabaseRetrieveStub;
-
+  xdescribe('checkout total', () => {
     beforeEach(() => addCheckout(checkoutId));
-    beforeEach(() => memberDatabaseRetrieveStub = sinon.stub(MemberDatabase.prototype, 'retrieve'));
-    beforeEach(()=> itemDatabaseRetrieveStub = sinon.stub(ItemDatabase.prototype, 'retrieve'));
-
-    afterEach(() => itemDatabaseRetrieveStub.restore());
-    afterEach(() => memberDatabaseRetrieveStub.restore());
-
-    const purchaseItem = (upc, price, exempt = false) => { 
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc, price, exempt }));
-      postItem({ params: { id: checkoutId }, body: { upc } }, response);
-      sendSpy.resetHistory();
-    }
-
-    const purchaseExemptItem = (upc, price) => { 
-      purchaseItem(upc, price, true);
-    };
-
-    const purchase = (upc, price) => { 
-      purchaseItem(upc, price, false);
-    };
-
-    const scanMember = (id, discount, name = 'Jeff Languid') => {
-      memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount: discount, name: name }));
-      postMember({ params: { id: checkoutId }, body: { id }}, response);
-      sendSpy.resetHistory();
-    }
 
     it('sums all items', () => {
       purchase('333', 3.50);
@@ -234,6 +228,22 @@ describe('checkout functionality', () => {
 
       expect(sinon.assert.calledWith(response.send, 
          sinon.match({ totalOfDiscountedItems:  3.60 })));
+    });
+  });
+
+  describe('message lines', () => {
+    beforeEach(() => addCheckout(checkoutId));
+
+    it('includes items and total', () => {
+      purchase('123', 5.00, 'Milk');
+      purchase('555', 12.00, 'Fancy eggs');
+
+      postCheckoutTotal({ params: { id: checkoutId } }, response);
+
+      expect(sinon.assert.calledWith(response.send,
+        sinon.match({ messages: ['Milk                                     5.00',
+                                 'Fancy eggs                              12.00',
+                                 'TOTAL                                   17.00' ]})));
     });
   });
 });
