@@ -49,7 +49,7 @@ describe('checkout functionality', () => {
   };
 
   const scanMember = (id, discount, name = 'Jeff Languid') => {
-    memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount: discount, name: name }));
+    memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount, name }));
     postMember({ params: { id: checkoutId }, body: { id }}, response);
     sendSpy.resetHistory();
   }
@@ -242,6 +242,20 @@ describe('checkout functionality', () => {
         sinon.match({ messages: ['Milk                                     5.00',
                                  'Fancy eggs                              12.00',
                                  'TOTAL                                   17.00' ]})));
+    });
+
+    it('includes discounts', () => {
+      scanMember('719-287-4335', 0.10);
+      purchase('123', 5.00, 'Milk');
+      purchaseExemptItem('555', 10.00, 'Fancy eggs');
+
+      postCheckoutTotal({ params: { id: checkoutId } }, response);
+
+      expect(sinon.assert.calledWith(response.send,
+        sinon.match({ messages: ['Milk                                     5.00',
+                                 '   10% mbr disc                         -0.50',
+                                 'Fancy eggs                              10.00',
+                                 'TOTAL                                   14.50' ]})));
     });
   });
 });

@@ -106,14 +106,31 @@ export const postCheckoutTotal = (request, response) => {
     let price = item.price;
     const isExempt = item.exempt;
     if (!isExempt && discount > 0) {  // TODO discounted item total is 0 if discount is 0
-      const discountedPrice = price - (discount * price);
+      const discountAmount = discount * price;
+      const discountedPrice = price - discountAmount;
+
+      // add into total
       totalOfDiscountedItems += discountedPrice;
       total += discountedPrice;
+
+      let text = item.description;
+      // format percent
+      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2)
+      const amountWidth = amount.length;
+
+      let textWidth = LineWidth - amountWidth;
+      messages.push(pad(text, textWidth) + amount);
+
+      // discount line
+      const discountFormatted = '-' + parseFloat(Math.round(discountAmount * 100) / 100).toFixed(2)
+      textWidth = LineWidth - discountFormatted.length;
+      text = `   ${discount * 100}% mbr disc`;
+      messages.push(`${pad(text, textWidth)}${discountFormatted}`);
     }
     else {
       total += price;
       const text = item.description;
-      const amount = formatAmount(price);
+      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2)
       const amountWidth = amount.length;
 
       const textWidth = LineWidth - amountWidth;
@@ -122,7 +139,7 @@ export const postCheckoutTotal = (request, response) => {
   });
 
   // append total line
-  const formattedTotal = formatAmount(total);
+  const formattedTotal = parseFloat(Math.round(total * 100) / 100).toFixed(2)
   const formattedTotalWidth = formattedTotal.length;
   const textWidth = LineWidth - formattedTotalWidth;
   messages.push(pad('TOTAL', textWidth) + formattedTotal);
@@ -131,5 +148,3 @@ export const postCheckoutTotal = (request, response) => {
   // send total saved instead
   response.send({ id: checkoutId, total, totalOfDiscountedItems, messages });
 };
-
-const formatAmount = amount => parseFloat(Math.round(amount * 100) / 100).toFixed(2);
