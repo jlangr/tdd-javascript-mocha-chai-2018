@@ -101,17 +101,17 @@ export const postCheckoutTotal = (request, response) => {
 
   let totalOfDiscountedItems = 0;
   let total = 0;
+  let totalSaved = 0;
 
   checkout.items.forEach(item => {
     let price = item.price;
     const isExempt = item.exempt;
     if (!isExempt && discount > 0) {
       const discountAmount = discount * price;
-      const discountedPrice = price - discountAmount;
+      const discountedPrice = price * (1.0 - discount);
 
       // add into total
       totalOfDiscountedItems += discountedPrice;
-      total += discountedPrice;
 
       let text = item.description;
       // format percent
@@ -121,11 +121,15 @@ export const postCheckoutTotal = (request, response) => {
       let textWidth = LineWidth - amountWidth;
       messages.push(pad(text, textWidth) + amount);
 
+      total += discountedPrice;
+
       // discount line
       const discountFormatted = '-' + parseFloat(Math.round(discountAmount * 100) / 100).toFixed(2)
       textWidth = LineWidth - discountFormatted.length;
       text = `   ${discount * 100}% mbr disc`;
       messages.push(`${pad(text, textWidth)}${discountFormatted}`);
+
+      totalSaved += discountAmount;
     }
     else {
       total += price;
@@ -144,7 +148,14 @@ export const postCheckoutTotal = (request, response) => {
   const textWidth = LineWidth - formattedTotalWidth;
   messages.push(pad('TOTAL', textWidth) + formattedTotal);
 
+  if (totalSaved > 0) {
+    const formattedTotal = parseFloat(Math.round(totalSaved * 100) / 100).toFixed(2)
+    const formattedTotalWidth = formattedTotal.length;
+    const textWidth = LineWidth - formattedTotalWidth;
+    messages.push(pad('*** You saved:', textWidth) + formattedTotal);
+  }
+
   response.status = 200;
   // send total saved instead
-  response.send({ id: checkoutId, total, totalOfDiscountedItems, messages });
+  response.send({ id: checkoutId, total, totalOfDiscountedItems, messages, totalSaved });
 };

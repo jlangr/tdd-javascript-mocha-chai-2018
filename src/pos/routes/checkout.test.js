@@ -213,8 +213,7 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-        sinon.match({ total: 9.60 })));
+      expectResponseMatches({ total: 9.60 });
     });
 
     it('provides total of discounted items', () => {
@@ -224,8 +223,17 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-         sinon.match({ totalOfDiscountedItems:  3.60 })));
+      expectResponseMatches({ totalOfDiscountedItems:  3.60 });
+    });
+
+    it('provides total saved on discounted items', () => {
+      scanMember('719-287-4335', 0.10);
+      purchase('333', 4.00);
+      purchase('444', 6.00);
+
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+
+      expectResponseMatches({ totalSaved:  1.00 });
     });
 
     it('provides 0 total for discounted items when no member scanned', () => {
@@ -233,8 +241,7 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-         sinon.match({ totalOfDiscountedItems: 0.0 })));
+      expectResponseMatches({ totalOfDiscountedItems: 0.0 });
     });
 
     it('provides 0 total for discounted items when member discount is 0', () => {
@@ -243,8 +250,7 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
 
-      expect(sinon.assert.calledWith(response.send, 
-         sinon.match({ totalOfDiscountedItems: 0.0 })));
+      expectResponseMatches({ totalOfDiscountedItems: 0.0 });
     });
   });
 
@@ -257,24 +263,26 @@ describe('checkout functionality', () => {
 
       postCheckoutTotal({ params: { id: checkoutId } }, response);
 
-      expect(sinon.assert.calledWith(response.send,
-        sinon.match({ messages: ['Milk                                     5.00',
-                                 'Fancy eggs                              12.00',
-                                 'TOTAL                                   17.00' ]})));
+      expectResponseMatches(
+         { messages: ['Milk                                     5.00',
+                      'Fancy eggs                              12.00',
+                      'TOTAL                                   17.00' ]});
     });
 
-    it('includes discounts', () => {
+    it('includes discounts and total saved', () => {
       scanMember('719-287-4335', 0.10);
       purchase('123', 5.00, 'Milk');
-      purchaseExemptItem('555', 10.00, 'Fancy eggs');
+      purchase('555', 2.79, 'Eggs');
 
       postCheckoutTotal({ params: { id: checkoutId } }, response);
 
-      expect(sinon.assert.calledWith(response.send,
-        sinon.match({ messages: ['Milk                                     5.00',
-                                 '   10% mbr disc                         -0.50',
-                                 'Fancy eggs                              10.00',
-                                 'TOTAL                                   14.50' ]})));
+      expectResponseMatches(
+        { messages: ['Milk                                     5.00',
+                     '   10% mbr disc                         -0.50',
+                     'Eggs                                     2.79',
+                     '   10% mbr disc                         -0.28',
+                     'TOTAL                                    7.01',
+                     '*** You saved:                           0.78' ] });
     });
   });
 });
