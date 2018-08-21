@@ -3,21 +3,22 @@
   "version": "0.1.0",
   "devDependencies": {
     "async": "^2.6.1",
+    "axios": "^0.18.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "coffeescript": "^2.3.1",
+    "express": "^4.16.3",
     "mocha": "^5.2.0",
+    "sinon": "^6.1.5",
     "supertest": "^3.1.0"
   },
-  "dependencies": {
-    "express": "^4.16.3",
-    "sinon": "^6.1.5"
-  },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --require babel-core/register",
-    "test:watch": "./node_modules/.bin/mocha --require babel-core/register --watch --reporter min"
+    "test": "./node_modules/.bin/mocha --require babel-core/register --require babel-polyfill --./src/**/*.test.js",
+    "test:watch": "./node_modules/.bin/mocha --require babel-core/register --require babel-polyfill ./src/**/*.test.js --watch --reporter min"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0"
   }
 }
