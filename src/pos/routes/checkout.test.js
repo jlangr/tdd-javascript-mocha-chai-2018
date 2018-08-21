@@ -177,80 +177,94 @@ describe('checkout functionality', () => {
   });
 
   describe('checkout total', () => {
-    beforeEach(() => addCheckout(checkoutId));
-
-    it('sums all items', () => {
-      purchase('333', 3.50);
-      purchase('444', 3.00);
-
-      postCheckoutTotal({ params: { id: checkoutId }}, response);
-
+    it('does stuff', () => {
+      Generator.reset(checkoutId);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
+      // set up for discountng
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', price: 3.33, description: '', exempt: false }));
+      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
+      sendSpy.resetHistory();
+      console.log('req id', checkoutId );
+      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '444', price: 4.44, description: '', exempt: false }));
+      postItem({ params: { id: checkoutId }, body: { upc: '444' } }, response);
+      sendSpy.resetHistory();
+      const request = { params: { id: checkoutId }};
+      postCheckoutTotal(request, response);
       expect(response.status).to.equal(200);
-      expectResponseMatches({ total: 6.50 });
-    });
+      console.log('reseponse status', response.status);
+      expect(sinon.assert.calledWith(response.send, sinon.match({ total: 7.77 })));
 
-    it('returns error when checkout not found', () => {
+      //  not found
       postCheckoutTotal({ params: { id: 'unknown' }}, response);
-
       expect(response.status).to.equal(400);
-      expectResponseEquals({ error: 'nonexistent checkout' });
+      sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' });
     });
 
     it('applies any member discount', () => {
-      scanMember('719-287-4335', 0.10);
-      purchase('333', 4.50);
-      purchase('444', 5.50);
-
+      Generator.reset(checkoutId);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
+      scanMember('719-287-4335', 0.25);
+      purchase('333', 3.33);
+      purchase('444', 4.44);
       postCheckoutTotal({ params: { id: checkoutId }}, response);
-
-      expectResponseMatches({ total: 9.00 });
+      expect(sinon.assert.calledWith(response.send, sinon.match({ total: 5.83 })));
     });
 
-    it('does not discount exempt items', () => {
+    it('3rd disc test', () => {
+      Generator.reset(1001);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
+      scanMember('719-287-4335', 0.085);
+      purchase('333', 4.40);
+      purchaseExemptItem('444', 5.50);
+      postCheckoutTotal({ params: { id: checkoutId }}, response);
+      expect(sinon.assert.calledWith(response.send, sinon.match({ total: 9.53 })));
+    });
+
+    it('discd tots', () => {
+      Generator.reset(1001);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
+      purchaseExemptItem('444', 6.00);
       scanMember('719-287-4335', 0.10);
       purchase('333', 4.00);
-      purchaseExemptItem('444', 6.00);
-
       postCheckoutTotal({ params: { id: checkoutId }}, response);
+      expect(sinon.assert.calledWith(response.send, sinon.match({ totalOfDiscountedItems:  3.60 })));
+      sendSpy.resetHistory();
 
-      expectResponseMatches({ total: 9.60 });
-    });
-
-    it('provides total of discounted items', () => {
-      scanMember('719-287-4335', 0.10);
-      purchase('333', 4.00);
-      purchaseExemptItem('444', 6.00);
-
-      postCheckoutTotal({ params: { id: checkoutId }}, response);
-
-      expectResponseMatches({ totalOfDiscountedItems:  3.60 });
-    });
-
-    it('provides total saved on discounted items', () => {
+      // amount saved
+      Generator.reset(1001);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
       scanMember('719-287-4335', 0.10);
       purchase('333', 4.00);
       purchase('444', 6.00);
-
       postCheckoutTotal({ params: { id: checkoutId }}, response);
-
-      expectResponseMatches({ totalSaved:  1.00 });
+      expect(sinon.assert.calledWith(response.send, sinon.match({ /* totalOfDiscountedItems*/totalSaved:  1.00 })));
     });
 
     it('provides 0 total for discounted items when no member scanned', () => {
+      Generator.reset(1001);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
       purchase('333', 4.00);
-
       postCheckoutTotal({ params: { id: checkoutId }}, response);
-
-      expectResponseMatches({ totalOfDiscountedItems: 0.0 });
+      expect(sinon.assert.calledWith(response.send, sinon.match({ totalOfDiscountedItems :   0.00 })));
     });
 
     it('provides 0 total for discounted items when member discount is 0', () => {
+      Generator.reset(1001);
+      postCheckout({}, response);
+      sendSpy.resetHistory();
       scanMember('719-287-4335', 0.00);
+      // addCheckout(checkoutId);
+
       purchase('333', 4.00);
 
       postCheckoutTotal({ params: { id: checkoutId }}, response);
-
-      expectResponseMatches({ totalOfDiscountedItems: 0.0 });
+      expect(sinon.assert.calledWith(response.send, sinon.match({ totalOfDiscountedItems :   0.00 })));
     });
   });
 
