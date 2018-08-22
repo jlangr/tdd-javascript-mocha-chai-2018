@@ -16,7 +16,8 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --require babel-core/register --require babel-polyfill --./src/**/*.test.js",
-    "test:watch": "./node_modules/.bin/mocha --require babel-core/register --require babel-polyfill ./src/**/*.test.js --watch --reporter min"
+    "test:watch": "./node_modules/.bin/mocha --require babel-core/register --require babel-polyfill ./src/**/*.test.js --watch --reporter min",
+    "compile": "babel src --out-dir .compiled --source-maps --watch"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0"
