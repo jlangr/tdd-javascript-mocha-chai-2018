@@ -115,7 +115,7 @@ export const postCheckoutTotal = (request, response) => {
 
       let text = item.description;
       // format percent
-      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2)
+      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2);
       const amountWidth = amount.length;
 
       let textWidth = LineWidth - amountWidth;
@@ -124,7 +124,7 @@ export const postCheckoutTotal = (request, response) => {
       total += discountedPrice;
 
       // discount line
-      const discountFormatted = '-' + parseFloat(Math.round(discountAmount * 100) / 100).toFixed(2)
+      const discountFormatted = '-' + parseFloat(Math.round(discountAmount * 100) / 100).toFixed(2);
       textWidth = LineWidth - discountFormatted.length;
       text = `   ${discount * 100}% mbr disc`;
       messages.push(`${pad(text, textWidth)}${discountFormatted}`);
@@ -134,7 +134,7 @@ export const postCheckoutTotal = (request, response) => {
     else {
       total += price;
       const text = item.description;
-      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2)
+      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2);
       const amountWidth = amount.length;
 
       const textWidth = LineWidth - amountWidth;
@@ -145,13 +145,13 @@ export const postCheckoutTotal = (request, response) => {
   total = Math.round(total * 100) / 100;
 
   // append total line
-  const formattedTotal = parseFloat(Math.round(total * 100) / 100).toFixed(2)
+  const formattedTotal = parseFloat(Math.round(total * 100) / 100).toFixed(2);
   const formattedTotalWidth = formattedTotal.length;
   const textWidth = LineWidth - formattedTotalWidth;
   messages.push(pad('TOTAL', textWidth) + formattedTotal);
 
   if (totalSaved > 0) {
-    const formattedTotal = parseFloat(Math.round(totalSaved * 100) / 100).toFixed(2)
+    const formattedTotal = parseFloat(Math.round(totalSaved * 100) / 100).toFixed(2);
     console.log(`formattedTotal: ${formattedTotal}`);
     const formattedTotalWidth = formattedTotal.length;
     const textWidth = LineWidth - formattedTotalWidth;

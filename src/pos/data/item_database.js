@@ -9,6 +9,6 @@ export default class ItemDatabase {
   retrieve(upc) {
     return items[upc];
   }
-};
+}
 
 // export default new ItemDatabase();

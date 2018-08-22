@@ -8,7 +8,7 @@ import {
   getItems,
   postItem,
   postMember
- } from './routes/checkout';
+} from './routes/checkout';
 
 export const app = express();
 

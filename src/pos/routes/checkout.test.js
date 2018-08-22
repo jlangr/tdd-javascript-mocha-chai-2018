@@ -38,7 +38,7 @@ describe('checkout functionality', () => {
     itemDatabaseRetrieveStub.callsFake(upc => ({ upc, price, description, exempt }));
     postItem({ params: { id: checkoutId }, body: { upc } }, response);
     sendSpy.resetHistory();
-  }
+  };
 
   const purchaseExemptItem = (upc, price, description='') => { 
     purchaseItem(upc, price, description, true);
@@ -52,7 +52,7 @@ describe('checkout functionality', () => {
     memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount, name }));
     postMember({ params: { id: checkoutId }, body: { id }}, response);
     sendSpy.resetHistory();
-  }
+  };
 
   const emptyResponse = () => ({ 
     send: sendSpy,
@@ -278,9 +278,9 @@ describe('checkout functionality', () => {
       postCheckoutTotal({ params: { id: checkoutId } }, response);
 
       expectResponseMatches(
-         { messages: ['Milk                                     5.00',
-                      'Fancy eggs                              12.00',
-                      'TOTAL                                   17.00' ]});
+        { messages: ['Milk                                     5.00',
+          'Fancy eggs                              12.00',
+          'TOTAL                                   17.00' ]});
     });
 
     it('includes discounts and total saved', () => {
@@ -292,11 +292,11 @@ describe('checkout functionality', () => {
 
       expectResponseMatches(
         { messages: ['Milk                                     5.00',
-                     '   10% mbr disc                         -0.50',
-                     'Eggs                                     2.79',
-                     '   10% mbr disc                         -0.28',
-                     'TOTAL                                    7.01',
-                     '*** You saved:                           0.78' ] });
+          '   10% mbr disc                         -0.50',
+          'Eggs                                     2.79',
+          '   10% mbr disc                         -0.28',
+          'TOTAL                                    7.01',
+          '*** You saved:                           0.78' ] });
     });
   });
 });
