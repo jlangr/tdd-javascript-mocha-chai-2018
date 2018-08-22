@@ -47,6 +47,8 @@ app.route('/checkouts/:id/total')
   .post(postCheckoutTotal);
 
 export const server = app.listen(port, err => {
+  // eslint-disable-next-line no-console
   if (err) return console.log('ERROR: ', err);
+  // eslint-disable-next-line no-console
   console.log(`server listening on ${port}`);
 });

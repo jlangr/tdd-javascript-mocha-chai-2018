@@ -49,7 +49,7 @@ describe('checkout functionality', () => {
   };
 
   const scanMember = (id, discount, name = 'Jeff Languid') => {
-    memberDatabaseRetrieveStub.callsFake(upc => ({ member: id, discount, name }));
+    memberDatabaseRetrieveStub.callsFake(_ => ({ member: id, discount, name }));
     postMember({ params: { id: checkoutId }, body: { id }}, response);
     sendSpy.resetHistory();
   };
@@ -111,7 +111,7 @@ describe('checkout functionality', () => {
     });
 
     it('returns created object on post', () => {
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: 'Milk', price: 3.33 }));
+      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '333', description: 'Milk', price: 3.33 }));
       Generator.reset(1002);
 
       postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
@@ -121,7 +121,7 @@ describe('checkout functionality', () => {
     });
 
     it('returns error when item UPC not found', () => {
-      itemDatabaseRetrieveStub.callsFake(upc => undefined);
+      itemDatabaseRetrieveStub.callsFake(_ => undefined);
 
       postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
 
@@ -130,7 +130,7 @@ describe('checkout functionality', () => {
     });
 
     it('returns error when checkout not found', () => {
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', description: '', price: 0.00 }));
+      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '333', description: '', price: 0.00 }));
 
       postItem({ params: { id: -1 }, body: { upc: '333' } }, response);
 
@@ -150,7 +150,7 @@ describe('checkout functionality', () => {
 
 
     it('attaches member information to checkout', () => {
-      memberDatabaseRetrieveStub.callsFake(upc => ({ member: '719-287-4335', discount: 0.01, name: 'Jeff Languid' }));
+      memberDatabaseRetrieveStub.callsFake(_ => ({ member: '719-287-4335', discount: 0.01, name: 'Jeff Languid' }));
       postMember({ params: { id: checkoutId }, body: { id: '719-287-4335' }}, response);
       sendSpy.resetHistory();
 
@@ -167,7 +167,7 @@ describe('checkout functionality', () => {
     });
 
     it('returns error when member not found', () => {
-      memberDatabaseRetrieveStub.callsFake(upc => undefined);
+      memberDatabaseRetrieveStub.callsFake(_ => undefined);
 
       postMember({ params: { id: checkoutId }, body: { id: 'anything' }}, response);
 
@@ -182,11 +182,11 @@ describe('checkout functionality', () => {
       postCheckout({}, response);
       sendSpy.resetHistory();
       // set up for discountng
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '333', price: 3.33, description: '', exempt: false }));
+      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '333', price: 3.33, description: '', exempt: false }));
       postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
       sendSpy.resetHistory();
       console.log('req id', checkoutId );
-      itemDatabaseRetrieveStub.callsFake(upc => ({ upc: '444', price: 4.44, description: '', exempt: false }));
+      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '444', price: 4.44, description: '', exempt: false }));
       postItem({ params: { id: checkoutId }, body: { upc: '444' } }, response);
       sendSpy.resetHistory();
       const request = { params: { id: checkoutId }};

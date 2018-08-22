@@ -7,7 +7,7 @@ const checkouts = {};
 const itemDatabase = new ItemDatabase();
 const memberDatabase = new MemberDatabase();
 
-export const clearAllCheckouts = (request, response) => {
+export const clearAllCheckouts = (_, __) => {
   for (var member in checkouts) delete checkouts[member];
 };
 
@@ -16,11 +16,11 @@ export const getCheckout = (request, response) => {
   return response.send(checkout);
 };
 
-export const getCheckouts = (request, response) => {
+export const getCheckouts = (_, response) => {
   return response.send(Object.values(checkouts));
 };
 
-export const postCheckout = (request, response) => {
+export const postCheckout = (_, response) => {
   const newCheckout = { id: Generator.id(), items: [] };
   checkouts[newCheckout.id] = newCheckout;
   response.status = 201;
@@ -85,7 +85,6 @@ export const postItem = (request, response) => {
 const pad = (s, length) => s + ' '.repeat(length - s.length);
 
 const LineWidth = 45;
-const MaxTextWidth = 40;
 
 export const postCheckoutTotal = (request, response) => {
   const checkoutId = request.params.id;

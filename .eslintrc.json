@@ -1,7 +1,8 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "mocha": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -15,6 +16,7 @@
         "react"
     ],
     "rules": {
+        "no-unused-vars": ["error", { "vars": "local", "args": "after-used", "argsIgnorePattern": "_" }],
         "indent": [
             "error",
             2

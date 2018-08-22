@@ -1,5 +1,5 @@
 export default class MemberDatabase {
-  retrieve(id) {
+  retrieve(_id) {
     return -1;
   }
 }
