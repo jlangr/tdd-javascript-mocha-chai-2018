@@ -1,16 +1,18 @@
 
 -- linting in VS
--- exercise: test doubles, with async await and without (i.e. directly with promises)
+-OK- exercise: test doubles, with async await and without (i.e. directly with promises)
 -- mongodb
 -- legacy exercises
 -- quickie tests for JS, examples: add an element to an array, see if it's in there; equals comparison; etc.
--- how to do double comparisons
+-OK- how to do double comparisons. chai expect(1.5).to.be.closeTo(1.502)  also: to.be.approximately
 -- integration testing tools?
 -- actions reducers etc
 -- components--snapshot testing
 -- refactoring plugin VS
 -- understand sinon sandbox
 -OK- debugging
+-- simple prototype update to do test double
+-- nock testing
 
 
 https://wietse.loves.engineering/testing-promises-with-mocha-90df8b7d2e35
