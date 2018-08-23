@@ -1,14 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { 
-  getCheckout,
-  getCheckouts,
-  postCheckout,
-  postCheckoutTotal,
-  getItems,
-  postItem,
-  postMember
-} from './routes/checkout';
+import * as route from './routes/checkout';
 
 export const app = express();
 
@@ -25,26 +17,25 @@ app.use((req, res, next) => {
 // TODO collapse checkouts route definitions?
 
 app.route('/checkouts')
-  .get(getCheckouts)
-  .post(postCheckout);
+  .get(route.getCheckouts)
+  .post(route.postCheckout);
 
 app.route('checkout/:id')
-  .get(getCheckout);
+  .get(route.getCheckout);
 
 // DELETE checkout
 // void item (delete)
 
 app.route('/checkouts/:id/items')
-  .get(getItems)
-  .post(postItem);
-
+  .get(route.getItems)
+  .post(route.postItem);
 
 // TODO how to test these directly
 app.route('/checkouts/:id/member')
-  .post(postMember);
+  .post(route.postMember);
 
 app.route('/checkouts/:id/total')
-  .post(postCheckoutTotal);
+  .post(route.postCheckoutTotal);
 
 export const server = app.listen(port, err => {
   // eslint-disable-next-line no-console
