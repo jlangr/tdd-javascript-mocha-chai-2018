@@ -6,9 +6,9 @@
 -- quickie tests for JS, examples: add an element to an array, see if it's in there; equals comparison; etc.
 -OK- how to do double comparisons. chai expect(1.5).to.be.closeTo(1.502)  also: to.be.approximately
 -- integration testing tools?
--- actions reducers etc
--- components--snapshot testing
--- refactoring plugin VS
+-OK- actions reducers etc
+-mostly OK- components--snapshot testing
+-OK- refactoring plugin VS
 -- understand sinon sandbox
 -OK- debugging
 -- simple prototype update to do test double
