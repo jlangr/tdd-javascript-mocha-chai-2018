@@ -4,7 +4,7 @@ SCAN_CODE=$2
 
 echo checkout id $CHECKOUT_ID
 
-URL=http://localhost:3001/checkouts/$CHECKOUT_ID/items
+URL=http://localhost:3101/checkouts/$CHECKOUT_ID/items
 echo URL: $URL
 
 curl -H "Content-Type: application/json"  -XPOST $URL -d "{\"upc\": \"$SCAN_CODE\"}" 
