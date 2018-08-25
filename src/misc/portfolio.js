@@ -1,8 +1,10 @@
-import * as ax from 'axios';
+import prodRetrievePrice from './stock-service';
+import ax from 'axios';
 
 export class Portfolio {
-  constructor() {
+  constructor(retrievePrice = prodRetrievePrice) {
     this.sharesBySymbol = {};
+    this.retrievePrice = retrievePrice;
   }
 
   isEmpty() {
@@ -36,7 +38,20 @@ export class Portfolio {
     return this.sharesBySymbol[symbol];
   }
 
-  retrievePrice(symbol) {
+  value() {
+    if (this.size() === 0) return 0;
+
+    const promises = Object.keys(this.sharesBySymbol).map(this.retrievePrice);
+
+    return Promise.all(promises)
+      .then(values => 
+        values.reduce((sum, value) => 
+          sum + (value.price * this.sharesOf(value.symbol)) , 0)
+      );
+  }
+
+  lookupPrice(symbol) {
+    console.log('hitting production service!');
     return ax.get(`http://localhost:3001/price?symbol=${symbol}`)
       .then(r => ({ symbol: symbol, price: r.data.price }));
     // .catch(error => {
@@ -44,11 +59,10 @@ export class Portfolio {
     // })
   }
 
-  value() {
+  valueViaLocalFunc() {
     if (this.size() === 0) return 0;
 
-    const promises = Object.keys(this.sharesBySymbol)
-      .map(this.retrievePrice.bind(this));
+    const promises = Object.keys(this.sharesBySymbol).map(this.lookupPrice);
 
     return Promise.all(promises)
       .then(values => 
