@@ -38,7 +38,7 @@ export class Portfolio {
     return this.sharesBySymbol[symbol];
   }
 
-  value() {
+  valueViaRetrievePrice() {
     if (this.size() === 0) return 0;
 
     const promises = Object.keys(this.sharesBySymbol).map(this.retrievePrice);
@@ -56,7 +56,7 @@ export class Portfolio {
       .then(r => ({ symbol: symbol, price: r.data.price }));
     // .catch(error => {
     //   return Promise.reject(error);
-    // })
+    // })  
   }
 
   valueViaLocalFunc() {

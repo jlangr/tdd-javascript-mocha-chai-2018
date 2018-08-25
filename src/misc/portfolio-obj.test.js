@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import PortfolioObj from './portfolio-obj';
-import sinon from 'sinon';
 
 describe('a portfolio', () => {
   let portfolio;

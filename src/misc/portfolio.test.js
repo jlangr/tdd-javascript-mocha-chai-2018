@@ -77,28 +77,82 @@ describe('a portfolio', () => {
     expect(() => { portfolio.sell(Monsanto, 50 + 1) }).to.throw(RangeError);
   });
 
-  xit('has value 0 when created', async () => {
-    const result = await portfolio.value();
+  it('has value 0 when created', async () => {
+    const result = await portfolio.valueViaRetrievePrice();
     expect(result).to.equal(0);
   });
 
-  describe('purchase stuff', () => {
+  describe('purchase stuff with constructor inection', () => {
     const MonsantoValue = 85;
     const IbmValue = 50;
     let portfolio;
 
-    it('is worth share price for single share purchase', async () => {
+    it('is worth share price for single share purchase -- promise, done-done ', (done) => {
       const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
       portfolio = new Portfolio(retrievePrice);
       portfolio.purchase(Monsanto, 1);
 
-      const result = await portfolio.value();
+      portfolio.valueViaRetrievePrice()
+        .then(result => { expect(result).to.equal(MonsantoValue); })
+        .then(done, done);
+    });
+
+    it('is worth share price for single share purchase -- await', async () => {
+      const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
+      portfolio = new Portfolio(retrievePrice);
+      portfolio.purchase(Monsanto, 1);
+
+      const result = await portfolio.valueViaRetrievePrice();
 
       expect(result).to.equal(MonsantoValue);
     });
 
     it('multiplies share price by number of shares', async () => {
+      const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
+      portfolio = new Portfolio(retrievePrice);
+      portfolio.purchase(Monsanto, 10);
+
+      const result = await portfolio.valueViaRetrievePrice();
+
+      expect(result).to.equal(10 * MonsantoValue);
+    });
+
+    it('iterates all symbols', async () => {
+      const retrievePrice = symbol => 
+        Promise.resolve({ symbol, price: (symbol === Monsanto ? MonsantoValue : IbmValue) });
+      portfolio = new Portfolio(retrievePrice);
+      portfolio.purchase(Monsanto, 2);
+      portfolio.purchase(Ibm, 4);
+
+      const result = await portfolio.valueViaRetrievePrice();
+
+      expect(result).to.equal(MonsantoValue * 2 
+                            + IbmValue * 4);
+    });
+  });
+
+  // TODO axios test tool
+
+  describe('purchase stuff with sinon stubbing', () => {
+    const MonsantoValue = 85;
+    const IbmValue = 50;
+    let portfolio;
+
+    beforeEach(() => {
       portfolio = new Portfolio();
+    });
+
+    it('is worth share price for single share purchase', async () => {
+      sinon.stub(portfolio, 'lookupPrice')
+        .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
+      portfolio.purchase(Monsanto, 1);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(MonsantoValue);
+    });
+
+    it('multiplies share price by number of shares', async () => {
       sinon.stub(portfolio, 'lookupPrice')
         .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
       portfolio.purchase(Monsanto, 10);
@@ -108,29 +162,17 @@ describe('a portfolio', () => {
       expect(result).to.equal(10 * MonsantoValue);
     });
 
-    // TODO axios test tool
+    it('iterates all symbols', async () => {
+      sinon.stub(portfolio, 'lookupPrice')
+        .withArgs(Monsanto).returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }))
+        .withArgs(Ibm).returns(Promise.resolve({ symbol: Ibm, price: 50 }));
+      portfolio.purchase(Monsanto, 2);
+      portfolio.purchase(Ibm, 4);
 
-    xit('iterates all symbols', async () => {
-      // sandbox.stub(portfolio, 'retrievePrice')
-      //   .withArgs(Monsanto).returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }))
-      //   .withArgs(Ibm).returns(Promise.resolve({ symbol: Ibm, price: 50 }));
-      // portfolio.purchase(Monsanto, 2);
-      // portfolio.purchase(Ibm, 4);
+      const result = await portfolio.valueViaLocalFunc();
 
-      // const result = await portfolio.value();
-
-      // expect(result).to.equal(MonsantoValue * 2 
-      //                       + IbmValue * 4);
-    });
-    
-    xit('is worth share price for single share purchase using promise technique', (done) => {
-      sinon.stub(portfolio, 'retrievePrice')
-        .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
-      portfolio.purchase(Monsanto, 1);
-
-      portfolio.value()
-        .then(result => { expect(result).to.equal(MonsantoValue); })
-        .then(done, done);
+      expect(result).to.equal(MonsantoValue * 2 
+                            + IbmValue * 4);
     });
   });
 });
