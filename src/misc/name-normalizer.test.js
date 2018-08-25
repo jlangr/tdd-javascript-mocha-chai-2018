@@ -2,39 +2,50 @@ import { expect } from 'chai';
 import { normalize } from './name-normalizer';
 
 describe('a name normalizer', () => {
-  xit('returns empty when passed empty string', () => {
-    expect(normalize('')).to.equal('');
+  it('returns empty when passed empty string', () => {
+    expect(normalize("")).to.equal("");
   });
 
-  xit('returns single word name', () => {
-    expect(normalize('Plato')).to.equal('Plato');
+  it('returns single word name', () => {
+    expect(normalize("Plato")).to.equal("Plato");
   });
 
-  xit('swaps first and last names', () => {
-    expect(normalize('Haruki Murakami')).to.equal('Murakami, Haruki');
+  it('trims spaces from single word name', () => {
+    expect(normalize("  Plato  ")).to.equal("Plato");
   });
 
-  xit('trims leading and trailing whitespace', () => {
-    expect(normalize('  Big Boi   ')).to.equal('Boi, Big');
+  it('swaps first and last names', () => {
+      expect(normalize("Haruki Murakami")).to.equal("Murakami, Haruki");
   });
 
-  xit('initializes middle name', () => {
-    expect(normalize('Henry David Thoreau')).to.equal('Thoreau, Henry D.');
+  it('trims leading and trailing whitespace', () => {
+      expect(normalize("  Big Boi   ")).to.equal("Boi, Big");
   });
 
-  xit('does not initialize one letter middle name', () => {
-    expect(normalize('Harry S Truman')).to.equal('Truman, Harry S');
+  it('initializes middle name', () => {
+      expect(normalize("Henry David Thoreau")).to.equal("Thoreau, Henry D.");
   });
 
-  xit('initializes each of multiple middle names', () => {
-    expect(normalize('Julia Scarlett Elizabeth Louis-Dreyfus')).to.equal('Louis-Dreyfus, Julia S. E.');
+  it('does not initialize one letter middle name', () => {
+      expect(normalize("Harry S Truman")).to.equal("Truman, Harry S");
   });
 
-  xit('appends suffixes to end', () => {
-    expect(normalize('Martin Luther King, Jr.')).to.equal('King, Martin L., Jr.');
+  it('initializes each of multiple middle names', () => {
+      expect(normalize("Julia Scarlett Elizabeth Louis-Dreyfus")).to.equal("Louis-Dreyfus, Julia S. E.");
   });
 
-  xit('throws when name contains two commas', () => {
-    expect(() => { normalize('Thurston, Howell, III'); }).to.throw();
+  it('appends suffixes to end', () => {
+      expect(normalize("Martin Luther King, Jr.")).to.equal("King, Martin L., Jr.");
+  });
+
+  it('throws when name contains two commas', () => {
+    expect(() => { normalize("Thurston, Howell, III") }).to.throw();
+  });
+
+  it('trims spaces from single word name with suffix', () => {
+    expect(normalize("  Madonna, Jr.  ")).to.equal("Madonna, Jr.");
   });
 });
+
+
+// Madonna JR?
