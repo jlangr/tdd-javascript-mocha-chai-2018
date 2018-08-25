@@ -87,9 +87,12 @@ describe('a portfolio', () => {
     const IbmValue = 50;
     let portfolio;
 
+    beforeEach(() => {
+      portfolio = new Portfolio();
+    });
+
     it('is worth share price for single share purchase -- promise, done-done ', (done) => {
-      const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
-      portfolio = new Portfolio(retrievePrice);
+      portfolio.retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
       portfolio.purchase(Monsanto, 1);
 
       portfolio.valueViaRetrievePrice()
@@ -98,8 +101,7 @@ describe('a portfolio', () => {
     });
 
     it('is worth share price for single share purchase -- await', async () => {
-      const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
-      portfolio = new Portfolio(retrievePrice);
+      portfolio.retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
       portfolio.purchase(Monsanto, 1);
 
       const result = await portfolio.valueViaRetrievePrice();
@@ -108,8 +110,7 @@ describe('a portfolio', () => {
     });
 
     it('multiplies share price by number of shares', async () => {
-      const retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
-      portfolio = new Portfolio(retrievePrice);
+      portfolio.retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
       portfolio.purchase(Monsanto, 10);
 
       const result = await portfolio.valueViaRetrievePrice();
@@ -118,9 +119,8 @@ describe('a portfolio', () => {
     });
 
     it('iterates all symbols', async () => {
-      const retrievePrice = symbol => 
+      portfolio.retrievePrice = symbol => 
         Promise.resolve({ symbol, price: (symbol === Monsanto ? MonsantoValue : IbmValue) });
-      portfolio = new Portfolio(retrievePrice);
       portfolio.purchase(Monsanto, 2);
       portfolio.purchase(Ibm, 4);
 
