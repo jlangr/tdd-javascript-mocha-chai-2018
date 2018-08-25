@@ -39,9 +39,9 @@ export class Portfolio {
   retrievePrice(symbol) {
     return ax.get(`http://localhost:3001/price?symbol=${symbol}`)
       .then(r => ({ symbol: symbol, price: r.data.price }));
-      // .catch(error => {
-      //   return Promise.reject(error);
-      // })
+    // .catch(error => {
+    //   return Promise.reject(error);
+    // })
   }
 
   value() {
@@ -54,15 +54,15 @@ export class Portfolio {
       .then(values => 
         values.reduce((sum, value) => 
           sum + (value.price * this.sharesOf(value.symbol)) , 0)
-       );
+      );
   }
 
-    // const symbol = 'BAYN';
-    // return axios(`http://localhost:3001/price?symbol=${symbol}`)
-    //   .then(response => {
-    //     return response.data.price * this.sharesOf(symbol);
-    //   })
-    //   .catch(error => {
-    //     return Promise.reject(error);
-    //   });
+  // const symbol = 'BAYN';
+  // return axios(`http://localhost:3001/price?symbol=${symbol}`)
+  //   .then(response => {
+  //     return response.data.price * this.sharesOf(symbol);
+  //   })
+  //   .catch(error => {
+  //     return Promise.reject(error);
+  //   });
 }

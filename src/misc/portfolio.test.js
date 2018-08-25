@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { Portfolio } from './portfolio';
 import sinon from 'sinon';
-import ax from 'axios';
 
 describe('a portfolio', () => {
   let portfolio;
@@ -101,7 +100,7 @@ describe('a portfolio', () => {
     expect(result).to.equal(MonsantoValue);
   });
 
-  // TODO nock
+  // TODO axios test tool
   it('multiplies share price by number of shares', async () => {
     sandbox.stub(portfolio, 'retrievePrice')
       .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
