@@ -50,6 +50,7 @@ export class Portfolio {
       );
   }
 
+  // but should this be in this class at all.
   lookupPrice(symbol) {
     console.log('hitting production service!');
     return ax.get(`http://localhost:3001/price?symbol=${symbol}`)

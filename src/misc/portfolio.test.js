@@ -1,11 +1,15 @@
 import { expect } from 'chai';
 import { Portfolio } from './portfolio';
 import sinon from 'sinon';
+import ax from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 
 describe('a portfolio', () => {
   let portfolio;
   const Monsanto = 'BAYN';
   const Ibm = 'IBM';
+  const MonsantoValue = 85;
+  const IbmValue = 50;
 
   beforeEach(() => {
     portfolio = new Portfolio();
@@ -82,15 +86,7 @@ describe('a portfolio', () => {
     expect(result).to.equal(0);
   });
 
-  describe('purchase stuff with constructor inection', () => {
-    const MonsantoValue = 85;
-    const IbmValue = 50;
-    let portfolio;
-
-    beforeEach(() => {
-      portfolio = new Portfolio();
-    });
-
+  describe('purchase stuff with property injection', () => {
     it('is worth share price for single share purchase -- promise, done-done ', (done) => {
       portfolio.retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
       portfolio.purchase(Monsanto, 1);
@@ -131,17 +127,7 @@ describe('a portfolio', () => {
     });
   });
 
-  // TODO axios test tool
-
   describe('purchase stuff with sinon stubbing', () => {
-    const MonsantoValue = 85;
-    const IbmValue = 50;
-    let portfolio;
-
-    beforeEach(() => {
-      portfolio = new Portfolio();
-    });
-
     it('is worth share price for single share purchase', async () => {
       sinon.stub(portfolio, 'lookupPrice')
         .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
@@ -166,6 +152,48 @@ describe('a portfolio', () => {
       sinon.stub(portfolio, 'lookupPrice')
         .withArgs(Monsanto).returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }))
         .withArgs(Ibm).returns(Promise.resolve({ symbol: Ibm, price: 50 }));
+      portfolio.purchase(Monsanto, 2);
+      portfolio.purchase(Ibm, 4);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(MonsantoValue * 2 
+                            + IbmValue * 4);
+    });
+  });
+
+  describe('purchase stuff with axios mock adapter', () => {
+    let mock;
+
+    beforeEach(() => {
+      mock = new MockAdapter(ax);
+    });
+
+    it('is worth share price for single share purchase', async () => {
+      mock.onGet(`http://localhost:3001/price?symbol=${Monsanto}`)
+        .reply(200, { symbol: Monsanto, price: MonsantoValue });
+      portfolio.purchase(Monsanto, 1);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(MonsantoValue);
+    });
+
+    it('multiplies share price by number of shares', async () => {
+      mock.onGet(`http://localhost:3001/price?symbol=${Monsanto}`)
+        .reply(200, { symbol: Monsanto, price: MonsantoValue });
+      portfolio.purchase(Monsanto, 10);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(10 * MonsantoValue);
+    });
+
+    it('iterates all symbols', async () => {
+      mock.onGet(`http://localhost:3001/price?symbol=${Monsanto}`)
+        .reply(200, { symbol: Monsanto, price: MonsantoValue });
+      mock.onGet(`http://localhost:3001/price?symbol=${Ibm}`)
+        .reply(200, { symbol: Ibm, price: IbmValue });
       portfolio.purchase(Monsanto, 2);
       portfolio.purchase(Ibm, 4);
 

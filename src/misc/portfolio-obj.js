@@ -1,11 +1,11 @@
 import ax from 'axios';
 
-function PortfolioObj() {
-  this.sharesBySymbol = {};
-}
+function PortfolioObj() { this.sharesBySymbol = {}; }
 
 PortfolioObj.prototype.isEmpty = function() { return this.size() === 0; };
+
 PortfolioObj.prototype.size = function() { return Object.keys(this.sharesBySymbol).length; }
+
 PortfolioObj.prototype.purchase = function(symbol, shares) { this.updateShares(symbol, shares); }
 
 PortfolioObj.prototype.throwWhenSellingTooMany = function(symbol, shares) { 
@@ -40,12 +40,10 @@ PortfolioObj.prototype.value = function() {
 };
 
 PortfolioObj.prototype.lookupPrice = function(symbol) {
-  console.log('hitting production service!');
   return ax.get(`http://localhost:3001/price?symbol=${symbol}`)
-    .then(r => ({ symbol: symbol, price: r.data.price }));
-  // .catch(error => {
-  //   return Promise.reject(error);
-  // })
+    .then(function(response) { 
+      return { symbol: symbol, price: response.data.price }; 
+    });
 };
 
 export default PortfolioObj;

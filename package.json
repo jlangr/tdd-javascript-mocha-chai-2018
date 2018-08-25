@@ -4,6 +4,7 @@
   "devDependencies": {
     "async": "^2.6.1",
     "axios": "^0.18.0",
+    "axios-mock-adapter": "^1.15.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "body-parser": "^1.18.3",
