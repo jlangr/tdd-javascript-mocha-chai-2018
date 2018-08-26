@@ -1,5 +1,5 @@
 
--- linting in VS
+-OK- linting in VS
 -OK- exercise: test doubles, with async await and without (i.e. directly with promises)
 -- mongodb
 -- legacy exercises
@@ -11,8 +11,11 @@
 -OK- refactoring plugin VS
 -- understand sinon sandbox
 -OK- debugging
--- simple prototype update to do test double
+-OK- simple prototype update to do test double
 -OK- nock testing--use for http package, not axios, I think
+-- expect throws
+-- sinon replace
+-- slides: Redux, component testing
 
 
 https://wietse.loves.engineering/testing-promises-with-mocha-90df8b7d2e35
