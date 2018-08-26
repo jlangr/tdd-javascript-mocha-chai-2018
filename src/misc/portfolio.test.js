@@ -78,7 +78,7 @@ describe('a portfolio', () => {
   it('throws when selling too many shares', () => {
     portfolio.purchase(Monsanto, 50);
 
-    expect(() => { portfolio.sell(Monsanto, 50 + 1) }).to.throw(RangeError);
+    expect(() => portfolio.sell(Monsanto, 50 + 1)).to.throw(RangeError);
   });
 
   it('has value 0 when created', async () => {
