@@ -1,8 +1,11 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import sinonChai from 'sinon-chai';
 import { Portfolio } from './portfolio';
 import sinon from 'sinon';
 import ax from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+
+chai.use(sinonChai);
 
 describe('a portfolio', () => {
   let portfolio;
@@ -156,6 +159,15 @@ describe('a portfolio', () => {
       portfolio.purchase('BAYN', 10);
       
       expect(auditSpy).to.have.been.calledWith('purchase 10 shares of BAYN');
+    });
+
+    it('supports matchers', () => {
+      const auditSpy = sinon.spy();
+      portfolio.useAuditor(auditSpy);
+
+      portfolio.purchase('BAYN', 10);
+      
+      expect(auditSpy).to.have.been.calledWithMatch('purchase 10 shares of BAYN', sinon.match.date);
     });
   });
 

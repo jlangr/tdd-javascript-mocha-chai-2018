@@ -18,7 +18,7 @@ export class Portfolio {
 
   purchase(symbol, shares) {
     this.updateShares(symbol, shares);
-    this.auditor(`purchase ${shares} shares of ${symbol}`);
+    this.auditor(`purchase ${shares} shares of ${symbol}`, new Date());
   }
 
   throwWhenSellingTooMany(symbol, shares) { 
