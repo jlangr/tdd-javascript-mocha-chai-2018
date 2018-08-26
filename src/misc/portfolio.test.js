@@ -86,14 +86,26 @@ describe('a portfolio', () => {
     expect(result).to.equal(0);
   });
 
+  const IBM = 'IBM';
   describe('purchase stuff with property injection', () => {
-    it('is worth share price for single share purchase -- promise, done-done ', (done) => {
-      portfolio.retrievePrice = () => Promise.resolve({ symbol: Monsanto, price: MonsantoValue });
-      portfolio.purchase(Monsanto, 1);
+    it('is worth share price for single share purchase -- promise, done-done', done => {
+      portfolio.retrievePrice = () => Promise.resolve({ symbol: IBM, price: 100 });
+      portfolio.purchase(IBM, 1);
 
-      portfolio.valueViaRetrievePrice()
-        .then(result => { expect(result).to.equal(MonsantoValue); })
+      portfolio.value()
+        .then(result => { expect(result).to.equal(100); })
         .then(done, done);
+    });
+
+    xit('is worth share price for single share purchase -- promise, done', done => {
+      portfolio.retrievePrice = () => Promise.resolve({ symbol: IBM, price: 100 });
+      portfolio.purchase(IBM, 1);
+
+      portfolio.value()
+        .then(result => { 
+          expect(result).to.equal(IBM); 
+          done();
+        });
     });
 
     it('is worth share price for single share purchase -- await', async () => {

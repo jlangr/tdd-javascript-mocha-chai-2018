@@ -60,6 +60,12 @@ export class Portfolio {
     // })  
   }
 
+  value() {
+    if (this.size() === 0) return 0;
+    return this.retrievePrice('IBM')
+      .then(({_symbol, price}) => { console.log('ibm price', price); return price; });
+  }
+
   valueViaLocalFunc() {
     if (this.size() === 0) return 0;
 

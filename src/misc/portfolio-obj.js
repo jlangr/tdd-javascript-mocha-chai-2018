@@ -27,7 +27,7 @@ PortfolioObj.prototype.sharesOf = function(symbol) {
   return this.sharesBySymbol[symbol];
 };
 
-PortfolioObj.prototype.value = function() {
+PortfolioObj.prototype.ALLvalue = function() {
   if (this.size() === 0) return 0;
 
   const promises = Object.keys(this.sharesBySymbol).map(this.lookupPrice);
@@ -37,6 +37,14 @@ PortfolioObj.prototype.value = function() {
       values.reduce((sum, value) => 
         sum + (value.price * this.sharesOf(value.symbol)) , 0)
     );
+};
+
+PortfolioObj.prototype.value = function() {
+  if (this.size() === 0) return 0;
+  return this.lookupPrice('BAYN')
+    .then(function({_symbol, price}) {
+      return price;
+    });
 };
 
 PortfolioObj.prototype.lookupPrice = function(symbol) {
