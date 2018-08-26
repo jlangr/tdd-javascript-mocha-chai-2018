@@ -139,6 +139,26 @@ describe('a portfolio', () => {
     });
   });
 
+  describe('auditing', () => {
+    it('does stuff', () => {
+      const auditSpy = sinon.spy();
+      portfolio.useAuditor(auditSpy);
+
+      portfolio.purchase('BAYN', 10);
+      
+      expect(auditSpy.calledWith('purchase 10 shares of BAYN')).to.be.true;
+    });
+
+    it('uses sinonjs support in chai', () => {
+      const auditSpy = sinon.spy();
+      portfolio.useAuditor(auditSpy);
+
+      portfolio.purchase('BAYN', 10);
+      
+      expect(auditSpy).to.have.been.calledWith('purchase 10 shares of BAYN');
+    });
+  });
+
   describe('purchase stuff with sinon stubbing', () => {
     it('is worth share price for single share purchase', async () => {
       sinon.stub(portfolio, 'lookupPrice')

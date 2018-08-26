@@ -5,6 +5,7 @@ export class Portfolio {
   constructor(retrievePrice = prodRetrievePrice) {
     this.sharesBySymbol = {};
     this.retrievePrice = retrievePrice;
+    this.auditor = this.audit;
   }
 
   isEmpty() {
@@ -17,6 +18,7 @@ export class Portfolio {
 
   purchase(symbol, shares) {
     this.updateShares(symbol, shares);
+    this.auditor(`purchase ${shares} shares of ${symbol}`);
   }
 
   throwWhenSellingTooMany(symbol, shares) { 
@@ -52,7 +54,6 @@ export class Portfolio {
 
   // but should this be in this class at all.
   lookupPrice(symbol) {
-    console.log('hitting production service!');
     return ax.get(`http://localhost:3001/price?symbol=${symbol}`)
       .then(r => ({ symbol: symbol, price: r.data.price }));
     // .catch(error => {
@@ -63,7 +64,7 @@ export class Portfolio {
   value() {
     if (this.size() === 0) return 0;
     return this.retrievePrice('IBM')
-      .then(({_symbol, price}) => { console.log('ibm price', price); return price; });
+      .then(({_symbol, price}) => price);
   }
 
   valueViaLocalFunc() {
@@ -76,6 +77,14 @@ export class Portfolio {
         values.reduce((sum, value) => 
           sum + (value.price * this.sharesOf(value.symbol)) , 0)
       );
+  }
+
+  useAuditor(auditor) {
+    this.auditor = auditor;
+  }
+
+  audit(message) {
+    console.log(message);
   }
 
   // const symbol = 'BAYN';
