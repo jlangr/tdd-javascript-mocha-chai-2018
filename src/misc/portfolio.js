@@ -63,8 +63,11 @@ export class Portfolio {
 
   value() {
     if (this.size() === 0) return 0;
-    return this.retrievePrice('IBM')
-      .then(({_symbol, price}) => price);
+    try {
+      return this.retrievePrice('IBM')
+        .then(({_symbol, price}) => price);
+    }
+    catch (error) { return 0; }
   }
 
   valueViaLocalFunc() {

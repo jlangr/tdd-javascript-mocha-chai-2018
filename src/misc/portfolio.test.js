@@ -204,7 +204,57 @@ describe('a portfolio', () => {
       expect(result).to.equal(MonsantoValue * 2 
                             + IbmValue * 4);
     });
+
+    it('answers 0 when price retrieval throws', async () => {
+      sinon.stub(portfolio, 'retrievePrice').throws();
+      portfolio.purchase(Monsanto, 2);
+      
+      const result = await portfolio.value();
+
+      expect(result).to.equal(0);
+    });
   });
+
+
+  describe('purchase stuff with sinon mocking', () => {
+    it('is worth share price for single share purchase', async () => {
+      const mock = sinon.mock(portfolio);
+      mock.expects('lookupPrice').once()
+        .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
+      portfolio.purchase(Monsanto, 1);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(MonsantoValue);
+    });
+
+    it('multiplies share price by number of shares', async () => {
+      const mock = sinon.mock(portfolio);
+      mock.expects('lookupPrice').once()
+        .returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }));
+      portfolio.purchase(Monsanto, 10);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(10 * MonsantoValue);
+    });
+
+    xit('iterates all symbols', async () => {
+      // cannot be done--mocks do not support multiple withArgs
+      const mock = sinon.mock(portfolio);
+      mock.expects('lookupPrice')
+        .withArgs(Monsanto).returns(Promise.resolve({ symbol: Monsanto, price: MonsantoValue }))
+        .withArgs(Ibm).returns(Promise.resolve({ symbol: Ibm, price: 50 }));
+      portfolio.purchase(Monsanto, 2);
+      portfolio.purchase(Ibm, 4);
+
+      const result = await portfolio.valueViaLocalFunc();
+
+      expect(result).to.equal(MonsantoValue * 2 
+                            + IbmValue * 4);
+    });
+  });
+
 
   describe('purchase stuff with axios mock adapter', () => {
     let mock;
