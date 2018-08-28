@@ -84,6 +84,9 @@ describe('a portfolio', () => {
     expect(() => portfolio.sell(Monsanto, 50 + 1)).to.throw(RangeError);
   });
 
+  // TODO ensure symbol count decremented on sell
+  // TODO remove symbol delete this.holdings[symbol]
+
   it('has value 0 when created', async () => {
     const result = await portfolio.valueViaRetrievePrice();
     expect(result).to.equal(0);
