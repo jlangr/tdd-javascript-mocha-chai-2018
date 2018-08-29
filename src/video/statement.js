@@ -1,21 +1,21 @@
 const calculateCost = (rental, movie) => {
   let cost = 0;
   switch (movie.code) {
-    case 'regular':
-      cost = 2;
-      if (rental.days > 2) {
-        cost += (rental.days - 2) * 1.5;
-      }
-      break;
-    case 'new':
-      cost = rental.days * 3;
-      break;
-    case 'childrens':
-      cost = 1.5;
-      if (rental.days > 3) {
-        cost += (rental.days - 3) * 1.5;
-      }
-      break;
+  case 'regular':
+    cost = 2;
+    if (rental.days > 2) {
+      cost += (rental.days - 2) * 1.5;
+    }
+    break;
+  case 'new':
+    cost = rental.days * 3;
+    break;
+  case 'childrens':
+    cost = 1.5;
+    if (rental.days > 3) {
+      cost += (rental.days - 3) * 1.5;
+    }
+    break;
   }
   return cost;
 };
