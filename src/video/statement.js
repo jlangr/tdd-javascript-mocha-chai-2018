@@ -1,44 +1,57 @@
-export function statement(customer, movies) {
-  let totalAmount = 0;
-  let frequentRenterPoints = 0;
-  let result = `Rental Record for ${customer.name}\n`;
-  for (let r of customer.rentals) {
-    let movie = movies[r.movieID];
-    let thisAmount = 0;
-
-    // determine amount for each movie
-    switch (movie.code) {
+const calculateCost = (rental, movie) => {
+  let cost = 0;
+  switch (movie.code) {
     case 'regular':
-      thisAmount = 2;
-      if (r.days > 2) {
-        thisAmount += (r.days - 2) * 1.5;
+      cost = 2;
+      if (rental.days > 2) {
+        cost += (rental.days - 2) * 1.5;
       }
       break;
     case 'new':
-      thisAmount = r.days * 3;
+      cost = rental.days * 3;
       break;
     case 'childrens':
-      thisAmount = 1.5;
-      if (r.days > 3) {
-        thisAmount += (r.days - 3) * 1.5;
+      cost = 1.5;
+      if (rental.days > 3) {
+        cost += (rental.days - 3) * 1.5;
       }
       break;
-    }
-
-    //add frequent renter points
-    frequentRenterPoints++;
-    // add bonus for a two day new release rental
-    if(movie.code === 'new' && r.days > 2) frequentRenterPoints++;
-
-    //print figures for this rental
-    result += `\t${movie.title}\t${thisAmount}\n` ;
-
-    totalAmount += thisAmount;
   }
-  // add footer lines
-  result += `Amount owed is ${totalAmount}\n`;
-  result += `You earned ${frequentRenterPoints} frequent renter points\n`;
+  return cost;
+};
 
+const calculateFrequentRenterPoints = (rental, movie) => {
+  let frequentRenterPoints = 0;
+  frequentRenterPoints++;
+  // bonus for a two day new release rental
+  if (movie.code === 'new' && rental.days > 2) frequentRenterPoints++;
+  return frequentRenterPoints;
+};
+
+const header = customer => `Rental Record for ${customer.name}\n`;
+
+const detail = (rental, movie) => 
+  `\t${movie.title}\t${calculateCost(rental, movie)}\n`;
+
+const calculateTotalCost = (rentals, movies) =>
+  rentals.reduce((total, rental) => 
+    total + calculateCost(rental, movies[rental.movieID]),
+  0);
+
+const calculateTotalFrequentRenterPoints = (rentals, movies) =>
+  rentals.reduce((total, rental) => 
+    total + calculateFrequentRenterPoints(rental, movies[rental.movieID]),
+  0);
+
+const footer = (rentals, movies) => {
+  return `Amount owed is ${calculateTotalCost(rentals, movies)}\n`
+    + `You earned ${calculateTotalFrequentRenterPoints(rentals, movies)} frequent renter points\n`;
+};
+
+export function statement(customer, movies) {
+  let result = header(customer);
+  for (let rental of customer.rentals)
+    result += detail(rental, movies[rental.movieID]);
+  result += footer(customer.rentals, movies);
   return result;
 }
-
