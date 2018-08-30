@@ -4,7 +4,6 @@ import ax from 'axios';
 export class Portfolio {
   constructor(retrievePrice = prodRetrievePrice) {
     this.sharesBySymbol = {};
-    this.auditor = this.audit;
   }
 
   isEmpty() {
@@ -17,7 +16,6 @@ export class Portfolio {
 
   purchase(symbol, shares) {
     this.updateShares(symbol, shares);
-    this.auditor(`purchase ${shares} shares of ${symbol}`, new Date());
   }
 
   throwWhenSellingTooMany(symbol, shares) { 
