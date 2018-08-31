@@ -1,19 +1,37 @@
-
--- linting in VS
--OK- exercise: test doubles, with async await and without (i.e. directly with promises)
 -- mongodb
 -- legacy exercises
+-- coverage
+-- integration testing tools?
+-OK- linting in VS
+-OK- exercise: test doubles, with async await and without (i.e. directly with promises)
 -OK- quickie tests for JS, examples: add an element to an array, see if it's in there; equals comparison; etc.
 -OK- how to do double comparisons. chai expect(1.5).to.be.closeTo(1.502)  also: to.be.approximately
--- integration testing tools?
 -OK- actions reducers etc
--mostly OK- components--snapshot testing
+-OK- components--snapshot testing
 -OK- refactoring plugin VS
--- understand sinon sandbox
+-OK- understand sinon sandbox
 -OK- debugging
--- simple prototype update to do test double
+-OK- simple prototype update to do test double
 -OK- nock testing--use for http package, not axios, I think
+-OK- expect throws
+-OK- sinon replace
+-OK- slides: Redux, component testing
 
+-- approvals testing?
+
+
+Seams:
+
+- text substitution
+- module -- dynamic import?
+- function
+- object / method; prototype
+
+-- Coverage--trip-service-kata
+   * `npm run coverage`
+   *  open `coverage/lcov-report/index.html` 
+
+Coverage--jest: npm run test -- --coverage
 
 https://wietse.loves.engineering/testing-promises-with-mocha-90df8b7d2e35
 
