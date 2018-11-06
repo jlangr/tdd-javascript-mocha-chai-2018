@@ -1,7 +1,7 @@
 -- mongodb
--- legacy exercises
+-OK- legacy exercises. Need more in the legacy section
 -- coverage
--- integration testing tools?
+-- integration testing tools
 -OK- linting in VS
 -OK- exercise: test doubles, with async await and without (i.e. directly with promises)
 -OK- quickie tests for JS, examples: add an element to an array, see if it's in there; equals comparison; etc.
