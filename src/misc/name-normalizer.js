@@ -1,3 +1,3 @@
 export const normalize = _ => {
-  return 'wha?';
-};
+  return 'wha?'
+}
