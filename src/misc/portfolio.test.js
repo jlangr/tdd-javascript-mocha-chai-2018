@@ -71,23 +71,35 @@ describe('a portfolio', () => {
     expect(Portfolio.sharesOf(portfolio, Bayer)).to.equal(42)
   })
 
-  describe('portfolio value', function () {
+  describe('portfolio value with stub', () => {
+    it('is symbol price for single-share purhcase', () => {
+      Portfolio.symbolLookupStub(symbol => symbol === 'IBM' ? 42 : 0)
+
+      portfolio = Portfolio.purchase(portfolio, 'IBM', 1)
+
+      console.log(portfolio)
+
+      expect(Portfolio.value(portfolio)).to.equal(42)
+    })
+  })
+
+  xdescribe('portfolio value', function () {
     const lookup = sinon.stub()
     lookup.withArgs(IBM).returns(IBMPrice)
     lookup.withArgs(Bayer).returns(BayerPrice)
 
     let prodLookup
 
-    beforeEach(function () {
+    beforeEach(() => {
       prodLookup = Portfolio.symbolLookup
       Portfolio.symbolLookupStub(lookup)
     })
 
-    afterEach(function () {
+    afterEach(() => {
       Portfolio.symbolLookupStub(prodLookup)
     })
 
-    it('is 0 when created', function () {
+    it('is 0 when created', () => {
       expect(Portfolio.value(portfolio)).to.equal(0)
     })
 
@@ -107,6 +119,7 @@ describe('a portfolio', () => {
       portfolio = Portfolio.purchase(portfolio, IBM, 20)
       portfolio = Portfolio.purchase(portfolio, Bayer, 10)
 
+      console.log('ortfolio', portfolio)
       expect(Portfolio.value(portfolio)).to.equal(20 * IBMPrice + 10 * BayerPrice)
     })
   })
