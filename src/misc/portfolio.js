@@ -1,11 +1,10 @@
+import { symbolLookup } from './stock-lookup-service'
+
 export const createPortfolio = () => ({ holdings: {} })
 
 export const empty = portfolio => size(portfolio) === 0
 
 export const size = portfolio => Object.keys(portfolio.holdings).length
-
-export let symbolLookup = _symbol => { throw new Error('not yet implemented') }
-export const symbolLookupStub = stub => symbolLookup = stub
 
 export const value = portfolio => empty(portfolio) ? 0 :
   Object.keys(portfolio.holdings).reduce(
