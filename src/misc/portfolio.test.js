@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import * as Portfolio from './portfolio'
+import * as StockLookupService from './stock-lookup-service'
 
 const Bayer = 'BAYN'
 const BayerPrice = 42
@@ -77,13 +78,11 @@ describe('a portfolio', () => {
 
       portfolio = Portfolio.purchase(portfolio, 'IBM', 1)
 
-      console.log(portfolio)
-
       expect(Portfolio.value(portfolio)).to.equal(42)
     })
   })
 
-  xdescribe('portfolio value', function () {
+  describe('portfolio value', () => {
     const lookup = sinon.stub()
     lookup.withArgs(IBM).returns(IBMPrice)
     lookup.withArgs(Bayer).returns(BayerPrice)
