@@ -6,7 +6,7 @@ This Javascript implementation uses Mocha, Chai, and supports ES6.
 npm install
 npm test 
 
-npm test:watch
+npm run test:watch
 ```
 
 NOTE: When using IntelliJ IDEA, ```import { expect } from 'chai'``` will likely show up as an unrecognized import.
