@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import * as Portfolio from './portfolio'
+import * as StockLookupService from './stock-lookup-service'
 
 describe('a portfolio', () => {
   let portfolio
@@ -62,4 +63,30 @@ describe('a portfolio', () => {
   it('throws when purchasing non positive shares', () => {
     expect(() => { Portfolio.purchase(portfolio, 'BAYN', -1 )}).to.throw()
   })
+
+  it('has no value before purchase', () => {
+    expect(Portfolio.value(portfolio)).to.equal(0)
+  })
+
+  it('is worth stock price for single share purchase', () => {
+    const BayerValue = 65
+    const priceStub = () => BayerValue
+    StockLookupService.symbolLookupStub(priceStub)
+
+    portfolio = Portfolio.purchase(portfolio, 'BAYN', 1)
+
+    expect(Portfolio.value(portfolio)).to.equal(BayerValue)
+  })
+
+  it('is worth stock price for single share purchase', () => {
+    const BayerValue = 65
+    const IbmValue = 130
+    const priceStub = () => BayerValue
+    StockLookupService.symbolLookupStub(priceStub)
+
+    portfolio = Portfolio.purchase(portfolio, 'BAYN', 1)
+
+    expect(Portfolio.value(portfolio)).to.equal(BayerValue)
+  })
+
 })

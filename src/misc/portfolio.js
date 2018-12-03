@@ -1,3 +1,5 @@
+import * as StockLookupService from './stock-lookup-service'
+
 export const create = () => ({ holdings: new Set() })
 
 export const isEmpty = portfolio => size(portfolio) === 0
@@ -15,3 +17,9 @@ export const purchase = (portfolio, symbol, purchasedShares) => {
 }
 
 export const size = portfolio => Object.keys(portfolio.holdings).length
+
+export const value = portfolio => {
+  if (isEmpty(portfolio)) return 0
+
+  return StockLookupService.symbolLookup('BAYN')
+}
