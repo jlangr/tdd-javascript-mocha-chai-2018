@@ -1,6 +1,6 @@
-import Generator from '../data/id-generator';
-import ItemDatabase from '../data/item_database';
-import MemberDatabase from '../data/member_database';
+import Generator from '../data/id-generator'
+import ItemDatabase from '../data/item_database'
+import MemberDatabase from '../data/member_database'
 
 const checkouts = {};
 
@@ -86,82 +86,89 @@ const pad = (s, length) => s + ' '.repeat(length - s.length);
 
 const LineWidth = 45;
 
+const addMessage = function (messages, text, amount) {
+  const amountFormatted = parseFloat(round2(amount)).toFixed(2)
+  const textWidth = LineWidth - amountFormatted.length
+  messages.push(pad(text, textWidth) + amountFormatted)
+}
+
+const round2 = function (amount) {
+  return Math.round(amount * 100) / 100
+}
+
+const errorResponse = function (response, message) {
+  response.status = 400
+  response.send({error: message})
+}
+
+const memberDiscountAmount = function (checkout) {
+  return checkout.member ? checkout.discount : 0
+}
+
+const successResponse = function (response, body) {
+  response.status = 200
+  response.send(body)
+}
+
+let canBeDiscounted = function (item, checkout) {
+  return !item.exempt && memberDiscountAmount(checkout) > 0
+}
+
+function calculateTotals(checkout) {
+  const memberDiscount = memberDiscountAmount(checkout)
+
+  let totalOfDiscountedItems = 0
+  let total = 0
+  let totalSaved = 0
+
+  checkout.items.forEach(item => {
+    total += item.price;
+
+    if (canBeDiscounted(item, checkout)) {
+      const discountAmount = memberDiscount * item.price;
+      const discountedPrice = item.price * (1.0 - memberDiscount);
+      totalOfDiscountedItems += discountedPrice;
+      total -= discountAmount;
+      totalSaved += discountAmount;
+    }
+  })
+  return { totalOfDiscountedItems, total, totalSaved }
+}
+
+function formatMessages(checkout, totals) {
+  const messages = []
+  const memberDiscount = memberDiscountAmount(checkout)
+
+  checkout.items.forEach(item => {
+    addMessage(messages, item.description, item.price)
+    if (canBeDiscounted(item, checkout)) {
+      const discountAmount = memberDiscount * item.price;
+      addMessage(messages, `   ${memberDiscount * 100}% mbr disc`, -discountAmount)
+    }
+  })
+
+  addMessage(messages, 'TOTAL', totals.total)
+  if (totals.totalSaved > 0)
+    addMessage(messages, '*** You saved:', totals.totalSaved)
+
+  return messages
+}
+
 export const postCheckoutTotal = (request, response) => {
   const checkoutId = request.params.id;
   const checkout = checkouts[checkoutId];
   if (!checkout) {
-    response.status = 400;
-    response.send({error: 'nonexistent checkout'});
-    return;
+    errorResponse(response, 'nonexistent checkout')
+    return
   }
 
-  const messages = [];
-  const discount = checkout.member ? checkout.discount : 0;
+  const totals = calculateTotals(checkout)
 
-  let totalOfDiscountedItems = 0;
-  let total = 0;
-  let totalSaved = 0;
-
-  checkout.items.forEach(item => {
-    let price = item.price;
-    const isExempt = item.exempt;
-    if (!isExempt && discount > 0) {
-      const discountAmount = discount * price;
-      const discountedPrice = price * (1.0 - discount);
-
-      // add into total
-      totalOfDiscountedItems += discountedPrice;
-
-      let text = item.description;
-      // format percent
-      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2);
-      const amountWidth = amount.length;
-
-      let textWidth = LineWidth - amountWidth;
-      messages.push(pad(text, textWidth) + amount);
-
-      total += discountedPrice;
-
-      // discount line
-      const discountFormatted = '-' + parseFloat(Math.round(discountAmount * 100) / 100).toFixed(2);
-      textWidth = LineWidth - discountFormatted.length;
-      text = `   ${discount * 100}% mbr disc`;
-      messages.push(`${pad(text, textWidth)}${discountFormatted}`);
-
-      totalSaved += discountAmount;
-    }
-    else {
-      total += price;
-      const text = item.description;
-      const amount = parseFloat(Math.round(price * 100) / 100).toFixed(2);
-      const amountWidth = amount.length;
-
-      const textWidth = LineWidth - amountWidth;
-      messages.push(pad(text, textWidth) + amount);
-    }
-  });
-
-  total = Math.round(total * 100) / 100;
-
-  // append total line
-  const formattedTotal = parseFloat(Math.round(total * 100) / 100).toFixed(2);
-  const formattedTotalWidth = formattedTotal.length;
-  const textWidth = LineWidth - formattedTotalWidth;
-  messages.push(pad('TOTAL', textWidth) + formattedTotal);
-
-  if (totalSaved > 0) {
-    const formattedTotal = parseFloat(Math.round(totalSaved * 100) / 100).toFixed(2);
-    console.log(`formattedTotal: ${formattedTotal}`);
-    const formattedTotalWidth = formattedTotal.length;
-    const textWidth = LineWidth - formattedTotalWidth;
-    messages.push(pad('*** You saved:', textWidth) + formattedTotal);
-  }
-
-  totalOfDiscountedItems = Math.round(totalOfDiscountedItems * 100) / 100;
-
-  totalSaved = Math.round(totalSaved * 100) / 100;
-
-  response.status = 200;
-  // send total saved instead
-  response.send({ id: checkoutId, total, totalOfDiscountedItems, messages, totalSaved });
-};
+  successResponse(response,
+    {id: checkoutId,
+      total: round2(totals.total),
+      totalOfDiscountedItems: round2(totals.totalOfDiscountedItems),
+      messages: formatMessages(checkout, totals),
+      totalSaved: round2(totals.totalSaved)
+    })
+}

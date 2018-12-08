@@ -1,6 +1,6 @@
-import { expect } from 'chai';
-import sinon from 'sinon';
-import { 
+import {expect} from 'chai'
+import sinon from 'sinon'
+import {
   clearAllCheckouts,
   getCheckout,
   getCheckouts,
@@ -8,10 +8,10 @@ import {
   postCheckoutTotal,
   postItem,
   postMember
-} from './checkout';
-import MemberDatabase from '../data/member_database';
-import ItemDatabase from '../data/item_database';
-import Generator from '../data/id-generator';
+} from './checkout'
+import MemberDatabase from '../data/member_database'
+import ItemDatabase from '../data/item_database'
+import Generator from '../data/id-generator'
 
 describe('checkout functionality', () => {
   let response;
@@ -176,30 +176,44 @@ describe('checkout functionality', () => {
     });
   });
 
-  describe('checkout total', () => {
-    it('does stuff', () => {
+  const purchaseItemWith = function (upc, price) {
+    itemDatabaseRetrieveStub.callsFake(_ => ({upc: upc, price: price, description: '', exempt: false}))
+    postItem({params: {id: checkoutId}, body: { upc }}, response)
+  }
+
+  const expectResponseMatching = function (object) {
+    expect(sinon.assert.calledWith(response.send, sinon.match(object)))
+  }
+
+  const expectErrorResponseWithMessage = function (message) {
+    expect(response.status).to.equal(400)
+    sinon.assert.calledWith(response.send, {error: message})
+  }
+
+  const AnArbitraryUpc = '333'
+  const AnotherAbritraryUpc = '444'
+
+  describe('total for a checkout', () => {
+    beforeEach(() => {
       Generator.reset(checkoutId);
       postCheckout({}, response);
       sendSpy.resetHistory();
-      // set up for discountng
-      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '333', price: 3.33, description: '', exempt: false }));
-      postItem({ params: { id: checkoutId }, body: { upc: '333' } }, response);
-      sendSpy.resetHistory();
-      console.log('req id', checkoutId );
-      itemDatabaseRetrieveStub.callsFake(_ => ({ upc: '444', price: 4.44, description: '', exempt: false }));
-      postItem({ params: { id: checkoutId }, body: { upc: '444' } }, response);
-      sendSpy.resetHistory();
-      const request = { params: { id: checkoutId }};
-      postCheckoutTotal(request, response);
-      expect(response.status).to.equal(200);
-      console.log('reseponse status', response.status);
-      expect(sinon.assert.calledWith(response.send, sinon.match({ total: 7.77 })));
+    })
 
-      //  not found
+    it('totals items purchased', () => {
+      purchaseItemWith(AnArbitraryUpc, 3.33)
+      purchaseItemWith(AnotherAbritraryUpc, 4.44)
+
+      postCheckoutTotal({params: {id: checkoutId}}, response)
+
+      expectResponseMatching({total: 7.77})
+    })
+
+    it('reponds with error when not found', () => {
       postCheckoutTotal({ params: { id: 'unknown' }}, response);
-      expect(response.status).to.equal(400);
-      sinon.assert.calledWith(response.send, { error: 'nonexistent checkout' });
-    });
+
+      expectErrorResponseWithMessage('nonexistent checkout')
+    })
 
     it('applies any member discount', () => {
       Generator.reset(checkoutId);

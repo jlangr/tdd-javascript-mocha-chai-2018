@@ -1,5 +1,9 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import * as Portfolio from './portfolio'
+import * as StockService from './stock-service'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+chai.use(sinonChai)
 
 describe('a portfolio', () => {
   let portfolio
@@ -76,5 +80,56 @@ describe('a portfolio', () => {
   it('throws when selling too many', () => {
     expect(() =>
       Portfolio.sell(portfolio,'BAYN', 10)).to.throw(RangeError)
+  })
+
+  describe('portfolio value', () => {
+    const BayerPrice = 65
+    const ApplePrice = 185
+    let stub
+    beforeEach(() => {
+      stub = sinon.stub()
+      StockService.setSymbolLookupStubForTesting(stub)
+    })
+
+    it('is worthless by default', () => {
+      expect(Portfolio.value(portfolio)).to.equal(0)
+    })
+
+    it('is worth share price for single share purchase', () => {
+      portfolio = Portfolio.purchase(portfolio,'BAYN', 1)
+      StockService.setSymbolLookupStubForTesting(_ => BayerPrice)
+
+      expect(Portfolio.value(portfolio)).to.equal(BayerPrice)
+    })
+
+    it('multiplies price by number of shares', () => {
+      portfolio = Portfolio.purchase(portfolio,'BAYN', 12)
+      StockService.setSymbolLookupStubForTesting(_ => BayerPrice)
+
+      expect(Portfolio.value(portfolio)).to.equal(BayerPrice * 12)
+    })
+
+    it('accumulates values for all symbols', () => {
+      stub.withArgs('BAYN').returns(BayerPrice)
+      stub.withArgs('AAPL').returns(ApplePrice)
+      portfolio = Portfolio.purchase(portfolio,'BAYN', 12)
+      portfolio = Portfolio.purchase(portfolio,'AAPL', 50)
+
+      expect(Portfolio.value(portfolio)).to.equal(
+        BayerPrice * 12 + ApplePrice * 50)
+    })
+
+    describe('auditing sales', () => {
+      it('audits sales', () => {
+        const spyAuditor = sinon.spy()
+        portfolio =
+          Portfolio.purchase(portfolio, 'BAYN', 10)
+        portfolio =
+          Portfolio.sell(portfolio, 'BAYN', 1, spyAuditor)
+
+        expect(spyAuditor).to.have.been.calledWith(
+          'sold 1 share of BAYN', sinon.match.date)
+      })
+    })
   })
 })

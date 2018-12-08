@@ -73,10 +73,10 @@ describe('a portfolio', () => {
   });
 
   describe('portfolio value', () => {
-    xit('has value 0 when created', async () => {
-      const result = await portfolio.value();
-      expect(result).to.equal(0);
-    });
+    // it('has value 0 when created', async () => {
+    //   const result = await portfolio.value();
+    //   expect(result).to.equal(0);
+    // });
 
     describe('when retrieve price must be called', () => {
     });
