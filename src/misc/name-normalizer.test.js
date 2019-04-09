@@ -2,15 +2,15 @@ import { expect } from 'chai'
 import { normalize } from './name-normalizer'
 
 describe('a name normalizer', () => {
-  xit('returns empty when passed empty string', () => {
+  it('returns empty when passed empty string', () => {
     expect(normalize('')).to.equal('')
   })
 
-  xit('returns single word name', () => {
+  it('returns single word name', () => {
     expect(normalize('Plato')).to.equal('Plato')
   })
 
-  xit('swaps first and last names', () => {
+  it('swaps first and last names', () => {
     expect(normalize('Haruki Murakami')).to.equal('Murakami, Haruki')
   })
 
@@ -38,3 +38,11 @@ describe('a name normalizer', () => {
     expect(() => { normalize('Thurston, Howell, III'); }).to.throw()
   })
 })
+
+// Extra Credit:
+//  salutations, e.g. Mr. Edmund Langr. U.S. Salutations are recognized as
+//     one of Mr., Mrs., Ms., and Dr.--either with or without the period.
+//     Anything else should be recognized as a first name
+
+// What other tests should you write? Not new features but things you know as a programmer
+// that you probably needed? (Or do you need them? Discuss.)
